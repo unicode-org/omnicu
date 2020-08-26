@@ -3,6 +3,7 @@
 members = [
     "components/data-provider",
     "components/data-provider-json",
+    "components/e2etests",
     "components/icu",
     "components/icu4x",
     "components/uniset",

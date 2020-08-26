@@ -1,0 +1,37 @@
+[package]
+name = "e2etests"
+version = "0.1.0"
+authors = ["The ICU4X Project Developers"]
+edition = "2018"
+readme = "README.md"
+repository = "https://github.com/unicode-org/icu4x"
+license = "MIT/Apache-2.0"
+categories = ["internationalization"]
+include = [
+    "src/**/*",
+    "Cargo.toml",
+    "README.md"
+]
+
+[dependencies]
+icu-locale = { path = "../locale" }
+
+[dependencies.serde]
+version = "1.0"
+default-features = false
+features = ["derive", "alloc"]
+
+[dependencies.serde_json]
+version = "1.0"
+default-features = false
+features = ["alloc"]
+
+[[test]]
+name = "test_data_parser"
+path = "src/lib.rs"
+required-features = ["std"]
+
+[[test]]
+name = "test_data_runner"
+path = "src/runner/runner.rs"
+required-features = ["std"]
