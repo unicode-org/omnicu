@@ -18,6 +18,7 @@ include = [
 icu-locale = { path = "../locale" }
 icu-data-provider = { path = "../data-provider" }
 fixed-decimal = { path = "../../utils/fixed-decimal" }
+smallvec = "1.4"
 
 [dev-dependencies]
 criterion = "0.3"
