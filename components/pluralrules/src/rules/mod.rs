@@ -48,6 +48,7 @@
 //! When parsed, the resulting [`AST`] will look like this:
 //!
 //! ```
+//! use smallvec::{SmallVec,smallvec};
 //! use icu_pluralrules::rules::parse_condition;
 //! use icu_pluralrules::rules::ast::*;
 //!
@@ -55,19 +56,19 @@
 //!
 //! let ast = parse_condition(input.as_bytes())
 //!     .expect("Parsing failed.");
-//! assert_eq!(ast, Condition(Box::new([
-//!     AndCondition(Box::new([
+//! assert_eq!(ast, Condition(smallvec![
+//!     AndCondition(smallvec![
 //!         Relation {
 //!             expression: Expression {
 //!                 operand: Operand::I,
 //!                 modulus: None,
 //!             },
 //!             operator: Operator::Eq,
-//!             range_list: RangeList(Box::new([
+//!             range_list: RangeList(smallvec![
 //!                 RangeListItem::Value(
 //!                     Value(1)
 //!                 )
-//!             ]))
+//!             ])
 //!         },
 //!         Relation {
 //!             expression: Expression {
@@ -75,14 +76,14 @@
 //!                 modulus: None,
 //!             },
 //!             operator: Operator::Eq,
-//!             range_list: RangeList(Box::new([
+//!             range_list: RangeList(smallvec![
 //!                 RangeListItem::Value(
 //!                     Value(0)
 //!                 )
-//!             ]))
-//!         },
-//!     ])),
-//! ])));
+//!             ])
+//!         }
+//!     ]),
+//! ]));
 //! ```
 //!
 //! Finally, we can pass this [`AST`] (in fact, just the [`Condition`] node),
