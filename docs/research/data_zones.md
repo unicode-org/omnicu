@@ -3,7 +3,7 @@ Zones of Information in Data Provider
 
 ## Background
 
-Fallbacking in i18n is a complex subject. This document focuses on one specific piece: splitting information into zones, with a discussion of how fallbacking should occur within each zone.
+This document discusses the point in the app lifecycle at which specific inputs to i18n libraries are known, with implications on data layout and fallback behavior.
 
 ## Three Zones of Information
 
@@ -101,7 +101,7 @@ struct DurationSymbolsV1<'s> {
 }
 ```
 
-This means that if you were to load `duration=long@1/en/latn.json`, you might get:
+This means that if you were to load `duration-long@1/en/latn.json`, you might get:
 
 ```json
 {
@@ -125,9 +125,45 @@ And that's the data loaded into an instance of DurationFormat. It should contain
 
 ## Fallbacking within Zone 2 (Resource Options)
 
-CLDR specifies many different pieces of data that have one or more *variants*. Within each variant, the structure of data is the same. Examples include:
+Resource keys are hard-coded at compile time, and data structs are transparent to the data provider.  All fallbacking that the data provider is responsible for, therefore, happens in Zone 2, the Resource Options.
 
-1. Month names: format and standalone
-2. Decimal symbols: numbering system
-3. Display widths: long, short, narrow
-4. Currency symbols: formality
+Resource options contain two types of fields: the language identifier, and what I'm calling a "variant", which may be the numbering system, for example.
+
+Fallbacking within the langauge identifier field is its own discussion, which is out of scope of this doc.  *For simplicity of illustration,* this doc assumes we were to implement the "en-GB, en-001, en" fallback chain found in ICU.
+
+Suppose we had a single variant, the numbering system.  Suppose the numbering system is `arab`.  The following resource options would need to be visited, in some order:
+
+- `en-GB/arab`
+- `en-001/arab`
+- `en/arab`
+- `und/arab`
+- `en-GB`
+- `en-001`
+- `en`
+- `und`
+
+The rows that don't have an explicit numbering system should contain the default numbering system for the locale, such that if a numbering system isn't provided, we can still access the symbols on a single lookup.
+
+The question is then: in what order do we visit these locale/variant combos?
+
+1. Fall back on language first, all the way to root (shown above)
+2. Fall back on langauge first, but stop before getting to root:
+    - `en-GB/arab`
+    - `en-001/arab`
+    - `en/arab`
+    - `en-GB`
+    - `en-001`
+    - `en`
+    - `und/arab`
+    - `und`
+3. Fall back on variant first:
+    - `en-GB/arab`
+    - `en-GB`
+    - `en-001/arab`
+    - `en-001`
+    - `en/arab`
+    - `en`
+    - `und/arab`
+    - `und`
+
+If more than one of these strategies is useful, we could consider making multiple variant fields on ResourceOptions with different fallback behavior.
