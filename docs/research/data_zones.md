@@ -76,7 +76,7 @@ The resource options might look like this ("arab" and "latn" are examples of num
 - `en/latn`
 - `und`
 
-Separate resource keys must be included in your data bundle, since they are user-dependent, but they need not be loaded into memory until requested.
+All resource options within a resource key must be included in your data bundle, since they are user-dependent, but they need not be loaded into memory until requested.
 
 The data struct then looks something like this:
 
