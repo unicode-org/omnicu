@@ -90,7 +90,7 @@ struct SymbolsByPlural<'s> {
     two: Option<Cow<'s, str>>,
     few: Option<Cow<'s, str>>,
     many: Option<Cow<'s, str>>,
-    other: Option<Cow<'s, str>>,
+    other: Cow<'s, str>,
 }
 
 struct DurationSymbolsV1<'s> {
