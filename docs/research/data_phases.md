@@ -1,11 +1,11 @@
-Zones of Information in Data Provider
-=====================================
+Phases of Information in Data Provider
+======================================
 
 ## Background
 
 This document discusses the point in the app lifecycle at which specific inputs to i18n libraries are known, with implications on data layout and fallback behavior.
 
-## Three Zones of Information
+## Three Phases of Information
 
 There are three points at which information may be known to the data provider:
 
@@ -15,7 +15,7 @@ There are three points at which information may be known to the data provider:
 
 ### Example: Duration Formatting
 
-Suppose you are formatting a time duration, such as a countdown timer for a video game. The breakdown of information known at each stage is:
+Suppose you are formatting a time duration, such as a countdown timer for a video game. The breakdown of information known in each phase is:
 
 1. **Compile Time**
     - Width (long, short, narrow, digital, …)
@@ -47,7 +47,7 @@ Date formatting is more complicated, but suppose you are formatting a date witho
 
 ## Resource Paths
 
-The point at which information is known should influence whether that information ends up in the resource key, resource options, or data struct. As a general rule of thumb:
+The phase in which information is known should influence whether that information ends up in the resource key, resource options, or data struct. As a general rule of thumb:
 
 - If information is known at *compile time*, it should be in the *resource key*.
 - If information is known at *construction time*, it should be in the *resource options*.
@@ -123,9 +123,9 @@ This means that if you were to load `duration-long@1/en/latn.json`, you might ge
 
 And that's the data loaded into an instance of DurationFormat. It should contain everything needed to format any arbitrary duration input, given the choices for width, locale, and numbering system given in the constructor.
 
-## Fallbacking within Zone 2 (Resource Options)
+## Fallbacking within Phase 2 (Resource Options)
 
-Resource keys are hard-coded at compile time, and data structs are transparent to the data provider.  All fallbacking that the data provider is responsible for, therefore, happens in Zone 2, the Resource Options.
+Resource keys are hard-coded at compile time, and data structs are transparent to the data provider.  All fallbacking that the data provider is responsible for, therefore, happens in Phase 2, the Resource Options.
 
 Resource options contain two types of fields: the language identifier, and what I'm calling a "variant", which may be the numbering system, for example.
 
