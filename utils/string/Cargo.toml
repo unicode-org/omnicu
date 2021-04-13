@@ -1,0 +1,20 @@
+# this file is part of icu4x. for terms of use, please see the file
+# called license at the top level of the icu4x source tree
+# (online at: https://github.com/unicode-org/icu4x/blob/main/license ).
+
+[package]
+name = "icu_string"
+description = "A collection of string related utilties used by ICU4X"
+version = "0.1.0"
+authors = ["The ICU4X Project Developers"]
+edition = "2018"
+readme = "README.md"
+repository = "https://github.com/unicode-org/icu4x"
+license-file = "../../LICENSE"
+include = [
+    "src/**/*",
+    "examples/**/*",
+    "benches/**/*",
+    "Cargo.toml",
+    "README.md"
+]
