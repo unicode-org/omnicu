@@ -2,6 +2,8 @@
 // called LICENSE at the top level of the ICU4X source tree
 // (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).
 
+#![warn(missing_docs)]
+
 //! `icu_datetime` is one of the [`ICU4X`] components.
 //!
 //! This API provides necessary functionality for formatting date and time to user readable textual representation.
@@ -77,9 +79,11 @@ mod fields;
 mod format;
 pub mod mock;
 pub mod options;
+#[allow(missing_docs)]
 #[doc(hidden)]
 pub mod pattern;
 pub mod provider;
+#[allow(missing_docs)]
 #[doc(hidden)]
 pub mod skeleton;
 // TODO(#622) make the time_zone module public once TimeZoneFormat is public.
