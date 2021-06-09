@@ -11,6 +11,7 @@ use tinystr::TinyStr8;
 macro_rules! map_access {
     ($outer: ty[$key: ty] => $inner: ty: $lt: lifetime) => {
         impl<$lt> $outer {
+            /// Get the data from the key.
             pub fn get<Q: ?Sized>(&self, key: &Q) -> Option<&$inner>
             where
                 Q: Ord,
@@ -19,6 +20,7 @@ macro_rules! map_access {
                 self.0.get(key)
             }
 
+            /// Check if the underlying data is empty.
             pub fn is_empty(&self) -> bool {
                 self.0.is_empty()
             }
