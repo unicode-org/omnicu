@@ -8,7 +8,7 @@ authors = ["The ICU4X Project Developers"]
 edition = "2018"
 version = "0.2.0"
 repository = "https://github.com/unicode-org/icu4x"
-license-file = "../../../LICENSE"
+license-file = "LICENSE"
 description = "Internal ICU4X benchmarking crate"
 # Keep this in sync with other crates unless there are exceptions
 include = [
