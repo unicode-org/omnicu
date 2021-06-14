@@ -86,7 +86,7 @@ where
 // TODO(#622) Make TimeZoneFormat public once we have a clean way to provide it options.
 pub(super) struct TimeZoneFormat<'d> {
     /// The pattern to format.
-    pub(super) pattern: Pattern,
+    pub(super) pattern: Pattern<'d>,
     /// The data that contains meta information about how to display content.
     pub(super) zone_formats: DataPayload<'d, 'd, provider::time_zones::TimeZoneFormatsV1Marker>,
     /// The exemplar cities for time zones.
@@ -131,7 +131,7 @@ impl<'d> TimeZoneFormat<'d> {
     // TODO(#622) Make this public once TimeZoneFormat is public.
     pub(super) fn try_new<L, ZP>(
         locale: L,
-        pattern: Pattern,
+        pattern: Pattern<'d>,
         zone_provider: &ZP,
     ) -> Result<Self, DateTimeFormatError>
     where

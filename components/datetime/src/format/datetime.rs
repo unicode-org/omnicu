@@ -45,7 +45,7 @@ pub struct FormattedDateTime<'l, T>
 where
     T: DateTimeInput,
 {
-    pub(crate) pattern: &'l Pattern,
+    pub(crate) pattern: &'l Pattern<'l>,
     pub(crate) symbols: &'l provider::gregory::DateSymbolsV1,
     pub(crate) datetime: &'l T,
     pub(crate) locale: &'l Locale,

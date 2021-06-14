@@ -61,7 +61,7 @@ use crate::{
 /// when we introduce asynchronous [`DataProvider`] and corresponding asynchronous constructor.
 pub struct DateTimeFormat<'d> {
     pub(super) locale: Locale,
-    pub(super) pattern: Pattern,
+    pub(super) pattern: Pattern<'d>,
     pub(super) symbols: DataPayload<'d, 'd, DateSymbolsV1Marker>,
 }
 
@@ -163,7 +163,7 @@ impl<'d> DateTimeFormat<'d> {
     /// [`ZonedDateTimeFormat`]: crate::zoned_datetime::ZonedDateTimeFormat
     pub(super) fn new<T: Into<Locale>>(
         locale: T,
-        pattern: Pattern,
+        pattern: Pattern<'d>,
         symbols: DataPayload<'d, 'd, DateSymbolsV1Marker>,
     ) -> Self {
         let locale = locale.into();
