@@ -34,7 +34,7 @@ use tinystr::tinystr8;
 
 struct MultiKeyStructProvider<'s> {
     pub symbols: StructProvider<'s, DateSymbolsV1>,
-    pub patterns: StructProvider<'s, DatePatternsV1>,
+    pub patterns: StructProvider<'s, DatePatternsV1<'s>>,
 }
 
 impl<'d, 's> DataProvider<'d, 's, DateSymbolsV1Marker> for MultiKeyStructProvider<'s> {

@@ -201,10 +201,10 @@ impl TryFrom<&str> for Skeleton {
 pub struct AvailableFormatPattern<'a> {
     /// The skeleton that is used to match against.
     skeleton: &'a Skeleton,
-    pub pattern: &'a Pattern,
+    pub pattern: &'a Pattern<'a>,
 }
 
-impl<'a> From<(&'a SkeletonV1, &'a PatternV1)> for AvailableFormatPattern<'a> {
+impl<'a> From<(&'a SkeletonV1, &'a PatternV1<'a>)> for AvailableFormatPattern<'a> {
     fn from(tuple: (&'a SkeletonV1, &'a PatternV1)) -> Self {
         let (skeleton_v1, pattern_v1) = tuple;
 
@@ -349,7 +349,7 @@ pub fn create_best_pattern_for_fields<'a>(
     skeletons: &'a SkeletonsV1,
     length_patterns: &LengthPatternsV1,
     fields: &[Field],
-) -> BestSkeleton<Pattern> {
+) -> BestSkeleton<Pattern<'a>> {
     let first_pattern_match = get_best_available_format_pattern(skeletons, fields);
 
     // Try to match a skeleton to all of the fields.
@@ -520,7 +520,7 @@ fn group_fields_by_type(fields: &[Field]) -> FieldsByType {
 pub fn get_best_available_format_pattern<'a>(
     skeletons: &'a SkeletonsV1,
     fields: &[Field],
-) -> BestSkeleton<&'a Pattern> {
+) -> BestSkeleton<&'a Pattern<'a>> {
     let mut closest_format_pattern = None;
     let mut closest_distance: u32 = u32::MAX;
     let mut closest_missing_fields = 0;
@@ -618,7 +618,7 @@ pub fn get_best_available_format_pattern<'a>(
 
 pub fn get_available_format_patterns<'a>(
     skeletons: &'a SkeletonsV1,
-) -> impl Iterator<Item = AvailableFormatPattern> + 'a {
+) -> impl Iterator<Item = AvailableFormatPattern<'a>> + 'a {
     skeletons.0.iter().map(AvailableFormatPattern::from)
 }
 

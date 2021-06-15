@@ -2,6 +2,7 @@
 // called LICENSE at the top level of the ICU4X source tree
 // (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).
 
+use icu_provider::yoke::ZeroCopyFrom;
 use std::borrow::Cow;
 
 #[derive(Debug, PartialEq, Clone, Default)]
@@ -28,19 +29,32 @@ icu_provider::impl_data_marker_no_lifetime!(
     feature = "provider_serde",
     derive(serde::Serialize, serde::Deserialize)
 )]
-pub struct DatePatternsV1 {
-    pub date: patterns::LengthPatternsV1,
+pub struct DatePatternsV1<'s> {
+    #[cfg_attr(feature = "provider_serde", serde(borrow))]
+    pub date: patterns::LengthPatternsV1<'s>,
 
-    pub time: patterns::LengthPatternsV1,
+    #[cfg_attr(feature = "provider_serde", serde(borrow))]
+    pub time: patterns::LengthPatternsV1<'s>,
 
-    pub datetime: patterns::DateTimeFormatsV1,
+    #[cfg_attr(feature = "provider_serde", serde(borrow))]
+    pub datetime: patterns::DateTimeFormatsV1<'s>,
 }
 
-icu_provider::impl_data_marker_no_lifetime!(
-    DatePatternsV1,
+icu_provider::unsafe_impl_data_marker_with_lifetime!(
+    DatePatternsV1<'s>,
     /// Marker type for [`DatePatternsV1`]
     DatePatternsV1Marker
 );
+
+impl<'s> ZeroCopyFrom<DatePatternsV1<'s>> for DatePatternsV1<'static> {
+    fn zero_copy_from<'b>(this: &'b DatePatternsV1<'s>) -> DatePatternsV1<'b> {
+        DatePatternsV1 {
+            date: patterns::LengthPatternsV1::zero_copy_from(&this.date),
+            time: patterns::LengthPatternsV1::zero_copy_from(&this.time),
+            datetime: patterns::DateTimeFormatsV1::zero_copy_from(&this.datetime),
+        }
+    }
+}
 
 macro_rules! symbols {
         ($name: ident, $expr: ty) => {
@@ -151,11 +165,22 @@ pub mod patterns {
         feature = "provider_serde",
         derive(serde::Serialize, serde::Deserialize)
     )]
-    pub struct LengthPatternsV1 {
-        pub full: Cow<'static, str>,
-        pub long: Cow<'static, str>,
-        pub medium: Cow<'static, str>,
-        pub short: Cow<'static, str>,
+    pub struct LengthPatternsV1<'s> {
+        pub full: Cow<'s, str>,
+        pub long: Cow<'s, str>,
+        pub medium: Cow<'s, str>,
+        pub short: Cow<'s, str>,
+    }
+
+    impl<'s> LengthPatternsV1<'s> {
+        pub fn zero_copy_from<'b>(this: &'b LengthPatternsV1<'s>) -> LengthPatternsV1<'b> {
+            LengthPatternsV1 {
+                full: Cow::Borrowed(this.full.as_ref()),
+                long: Cow::Borrowed(this.long.as_ref()),
+                medium: Cow::Borrowed(this.medium.as_ref()),
+                short: Cow::Borrowed(this.short.as_ref()),
+            }
+        }
     }
 
     /// This struct is a public wrapper around the internal [`Pattern`] struct. This allows
@@ -169,15 +194,17 @@ pub mod patterns {
         feature = "provider_serde",
         derive(serde::Serialize, serde::Deserialize)
     )]
-    pub struct PatternV1(pub Pattern);
+    pub struct PatternV1<'s>(
+        #[cfg_attr(feature = "provider_serde", serde(borrow))] pub Pattern<'s>,
+    );
 
-    impl From<Pattern> for PatternV1 {
-        fn from(pattern: Pattern) -> Self {
+    impl<'s> From<Pattern<'s>> for PatternV1<'s> {
+        fn from(pattern: Pattern<'s>) -> Self {
             Self(pattern)
         }
     }
 
-    impl TryFrom<&str> for PatternV1 {
+    impl<'s> TryFrom<&str> for PatternV1<'s> {
         type Error = pattern::Error;
 
         fn try_from(pattern_string: &str) -> Result<Self, Self::Error> {
@@ -218,15 +245,29 @@ pub mod patterns {
         feature = "provider_serde",
         derive(serde::Serialize, serde::Deserialize)
     )]
-    pub struct SkeletonsV1(pub LiteMap<SkeletonV1, PatternV1>);
+    pub struct SkeletonsV1<'s>(
+        #[cfg_attr(feature = "provider_serde", serde(borrow))]
+        pub  LiteMap<SkeletonV1, PatternV1<'s>>,
+    );
 
     #[derive(Debug, PartialEq, Clone, Default)]
     #[cfg_attr(
         feature = "provider_serde",
         derive(serde::Serialize, serde::Deserialize)
     )]
-    pub struct DateTimeFormatsV1 {
-        pub length_patterns: LengthPatternsV1,
-        pub skeletons: SkeletonsV1,
+    pub struct DateTimeFormatsV1<'s> {
+        #[cfg_attr(feature = "provider_serde", serde(borrow))]
+        pub length_patterns: LengthPatternsV1<'s>,
+        #[cfg_attr(feature = "provider_serde", serde(borrow))]
+        pub skeletons: SkeletonsV1<'s>,
+    }
+
+    impl<'s> DateTimeFormatsV1<'s> {
+        pub fn zero_copy_from<'b>(this: &'b DateTimeFormatsV1<'s>) -> DateTimeFormatsV1<'b> {
+            DateTimeFormatsV1 {
+                length_patterns: LengthPatternsV1::zero_copy_from(&this.length_patterns),
+                skeletons: this.skeletons.clone(),
+            }
+        }
     }
 }
