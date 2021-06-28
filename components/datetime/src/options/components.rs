@@ -9,8 +9,8 @@
 //! | Algorithm step | Status |
 //! |----------------|--------|
 //! | Match skeleton fields according to a ranking             | Implemented |
-//! | Adjust the matched pattern to have certain widths        | Not yet implemented. See [issue #584](https://github.com/unicode-org/icu4x/issues/584) |
-//! | Match date and times separately, and them combine them   | Not yet implemented. See [issue #585](https://github.com/unicode-org/icu4x/issues/585) |
+//! | Adjust the matched pattern to have certain widths        | Implemented |
+//! | Match date and times separately, and them combine them   | Implemented |
 //! | Use appendItems to fill in a pattern with missing fields | Not yet, and may not be fully implemented. See [issue #586](https://github.com/unicode-org/icu4x/issues/586) |
 //!
 //! # Description
