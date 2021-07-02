@@ -225,7 +225,7 @@ impl Bag {
                     // region-based (h12 for US, h23 for GB, etc). This is in CLDR, but we need
                     // to load it as well as think about the best architecture for where that
                     // data loading code should reside.
-                    _ => fields::Hour::H24,
+                    _ => fields::Hour::H23,
                 }),
                 length: match hour {
                     // Example for h: (note that this is the same for k, K, and H)
@@ -368,7 +368,7 @@ mod test {
                 (Symbol::Year(fields::Year::Calendar), Length::One).into(),
                 (Symbol::Month(fields::Month::Format), Length::Wide).into(),
                 (Symbol::Day(fields::Day::DayOfMonth), Length::One).into(),
-                (Symbol::Hour(fields::Hour::H24), Length::One).into(),
+                (Symbol::Hour(fields::Hour::H23), Length::One).into(),
                 (Symbol::Minute, Length::One).into(),
                 (Symbol::Second(fields::Second::Second), Length::One).into(),
             ]
