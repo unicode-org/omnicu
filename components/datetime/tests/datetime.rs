@@ -69,26 +69,29 @@ fn test_fixture(fixture_name: &str) {
         let value: MockDateTime = fx.input.value.parse().unwrap();
 
         let result = dtf.format_to_string(&value);
-        match fx.description {
-            Some(description) => assert_eq!(
-                result, fx.output.value,
-                "expected {:?} to equal {:?} – {}",
-                result, fx.output.value, description
-            ),
-            None => assert_eq!(result, fx.output.value),
-        }
+        let description = match fx.description {
+            Some(description) => {
+                format!(
+                    "\n  test: {:?}\n  file: {}.json\n",
+                    description, fixture_name
+                )
+            }
+            None => format!("\n  file: {}.json\n", fixture_name),
+        };
+
+        assert_eq!(result, fx.output.value, "{}", description);
 
         let mut s = String::new();
         dtf.format_to_write(&mut s, &value).unwrap();
-        assert_eq!(s, fx.output.value, "\n file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
 
         let fdt = dtf.format(&value);
         let s = fdt.to_string();
-        assert_eq!(s, fx.output.value, "\n file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
 
         let mut s = String::new();
         write!(s, "{}", fdt).unwrap();
-        assert_eq!(s, fx.output.value, "\n file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
     }
 }
 
@@ -110,19 +113,29 @@ fn test_fixture_with_time_zones(fixture_name: &str, config: TimeZoneConfig) {
         value.time_zone.time_variant = config.time_variant;
 
         let result = dtf.format_to_string(&value);
-        assert_eq!(result, fx.output.value, "\n  file: {}.json\n", fixture_name);
+        let description = match fx.description {
+            Some(description) => {
+                format!(
+                    "\n  test: {:?}\n  file: {}.json\n",
+                    description, fixture_name
+                )
+            }
+            None => format!("\n  file: {}.json\n", fixture_name),
+        };
+
+        assert_eq!(result, fx.output.value, "{}", description);
 
         let mut s = String::new();
         dtf.format_to_write(&mut s, &value).unwrap();
-        assert_eq!(s, fx.output.value, "\n  file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
 
         let fdt = dtf.format(&value);
         let s = fdt.to_string();
-        assert_eq!(s, fx.output.value, "\n  file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
 
         let mut s = String::new();
         write!(s, "{}", fdt).unwrap();
-        assert_eq!(s, fx.output.value, "\n  file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
     }
 }
 
