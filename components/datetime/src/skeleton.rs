@@ -357,17 +357,7 @@ pub fn create_best_pattern_for_fields<'a>(
         return BestSkeleton::AllFieldsMatch(pattern);
     }
 
-    let FieldsByType { date, time, other } = group_fields_by_type(fields);
-
-    if !other.is_empty() {
-        // These require "append items" support, see #586.
-        // TODO(#583) - TimeZones
-        // TODO(#486) - Eras,
-        // ... etc.
-        unimplemented!(
-            "There are no \"other\" fields supported, these need to be appended to the pattern. {:?}", other
-        );
-    }
+    let FieldsByType { date, time } = group_fields_by_type(fields);
 
     if date.is_empty() || time.is_empty() {
         return match first_pattern_match {
@@ -459,13 +449,11 @@ pub fn create_best_pattern_for_fields<'a>(
 struct FieldsByType {
     pub date: Vec<Field>,
     pub time: Vec<Field>,
-    pub other: Vec<Field>,
 }
 
 fn group_fields_by_type(fields: &[Field]) -> FieldsByType {
     let mut date = Vec::new();
     let mut time = Vec::new();
-    let mut other = Vec::new();
 
     for field in fields {
         match field.symbol {
@@ -483,17 +471,16 @@ fn group_fields_by_type(fields: &[Field]) -> FieldsByType {
             FieldSymbol::DayPeriod(_)
             | FieldSymbol::Hour(_)
             | FieldSymbol::Minute
-            | FieldSymbol::Second(_) => time.push(*field),
-
+            | FieldSymbol::Second(_)
+            | FieldSymbol::TimeZone(_) => time.push(*field),
             // Other components
-            FieldSymbol::TimeZone(_) => other.push(*field),
             // TODO(#486)
             // FieldSymbol::Era(_) => other.push(*field),
             // Plus others...
         };
     }
 
-    FieldsByType { date, time, other }
+    FieldsByType { date, time }
 }
 
 /// A partial implementation of the [UTS 35 skeleton matching algorithm](https://unicode.org/reports/tr35/tr35-dates.html#Matching_Skeletons).
@@ -736,6 +723,7 @@ mod test {
 
     // TODO(#586) - Append items support needs to be added.
     #[test]
+    #[should_panic]
     fn test_missing_append_items_support() {
         let components = components::Bag {
             year: Some(components::Numeric::Numeric),
@@ -754,11 +742,10 @@ mod test {
             &requested_fields,
         ) {
             BestSkeleton::AllFieldsMatch(available_format_pattern) => {
-                // TODO - This needs to support the "Z" pattern. This test will begin to fail
-                // once support is added.
+                // TODO - Append items are needed here.
                 assert_eq!(
                     available_format_pattern.to_string(),
-                    String::from("MMMM d, y")
+                    String::from("MMMM d, y vvvv")
                 )
             }
             best => panic!("Unexpected {:?}", best),
