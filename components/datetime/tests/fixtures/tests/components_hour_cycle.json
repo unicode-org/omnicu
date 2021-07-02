@@ -1,0 +1,139 @@
+[
+  {
+    "description": "h11 in the english locale",
+    "input": {
+        "locale": "en",
+        "value": "2020-01-07T00:25:07.000",
+        "options": {
+            "components": {
+                "hour": "numeric",
+                "minute": "numeric",
+                "preferences": { "hourCycle": "h11" }
+            }
+        }
+    },
+    "output": {
+        "value": "0:25 AM"
+    }
+  },
+  {
+    "description": "h12 in the english locale",
+    "input": {
+        "locale": "en",
+        "value": "2020-01-07T00:25:07.000",
+        "options": {
+            "components": {
+                "hour": "numeric",
+                "minute": "numeric",
+                "preferences": { "hourCycle": "h12" }
+            }
+        }
+    },
+    "output": {
+        "value": "12:25 AM"
+    }
+  },
+  {
+      "description": "h23 in the english locale",
+      "input": {
+          "locale": "en",
+          "value": "2020-01-07T00:25:07.000",
+          "options": {
+              "components": {
+                  "hour": "numeric",
+                  "minute": "numeric",
+                  "preferences": { "hourCycle": "h23" }
+              }
+          }
+      },
+      "output": {
+          "value": "00:25"
+      }
+  },
+  {
+      "description": "h24 in the english locale",
+      "input": {
+          "locale": "en",
+          "value": "2020-01-07T00:25:07.000",
+          "options": {
+              "components": {
+                  "hour": "numeric",
+                  "minute": "numeric",
+                  "preferences": { "hourCycle": "h24" }
+              }
+          }
+      },
+      "output": {
+          "value": "24:25"
+      }
+  },
+
+  {
+    "description": "h11 in the arabic locale",
+    "input": {
+        "locale": "ar",
+        "value": "2020-01-07T00:25:07.000",
+        "options": {
+            "components": {
+                "hour": "numeric",
+                "minute": "numeric",
+                "preferences": { "hourCycle": "h11" }
+            }
+        }
+    },
+    "output": {
+        "value": "0:25 ص"
+    }
+  },
+  {
+    "description": "h12 in the arabic locale",
+    "input": {
+        "locale": "ar",
+        "value": "2020-01-07T00:25:07.000",
+        "options": {
+            "components": {
+                "hour": "numeric",
+                "minute": "numeric",
+                "preferences": { "hourCycle": "h12" }
+            }
+        }
+    },
+    "output": {
+        "value": "12:25 ص"
+    }
+  },
+  {
+      "description": "h23 in the arabic locale",
+      "input": {
+          "locale": "ar",
+          "value": "2020-01-07T00:25:07.000",
+          "options": {
+              "components": {
+                  "hour": "numeric",
+                  "minute": "numeric",
+                  "preferences": { "hourCycle": "h23" }
+              }
+          }
+      },
+      "output": {
+          "value": "00:25"
+      }
+  },
+  {
+      "description": "h24 in the arabic locale",
+      "input": {
+          "locale": "ar",
+          "value": "2020-01-07T00:25:07.000",
+          "options": {
+              "components": {
+                  "hour": "numeric",
+                  "minute": "numeric",
+                  "preferences": { "hourCycle": "h24" }
+              }
+          }
+      },
+      "output": {
+          "value": "24:25"
+      }
+  }
+]

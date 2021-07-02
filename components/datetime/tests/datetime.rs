@@ -309,6 +309,12 @@ fn test_components_exact_matches() {
     test_fixture("components-exact-matches");
 }
 
+#[test]
+fn test_components_hour_cycle() {
+    // components/datetime/tests/fixtures/tests/components_hour_cycle.json
+    test_fixture("components_hour_cycle");
+}
+
 /// Tests that component::Bags can adjust for width differences in the final pattern.
 #[test]
 fn test_components_width_differences() {

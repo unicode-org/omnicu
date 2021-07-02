@@ -212,14 +212,18 @@ impl Bag {
                     Some(preferences::Bag {
                         hour_cycle: Some(hour_cycle),
                     }) => match hour_cycle {
-                        // k - symbol
-                        preferences::HourCycle::H24 => fields::Hour::H24,
-                        // H - symbol
-                        preferences::HourCycle::H23 => fields::Hour::H23,
-                        // h - symbol
-                        preferences::HourCycle::H12 => fields::Hour::H12,
-                        // K - symbol
-                        preferences::HourCycle::H11 => fields::Hour::H11,
+                        // Skeletons only contain the h12, not h11. The pattern that is matched
+                        // is free to use h11 or h12.
+                        preferences::HourCycle::H11 | preferences::HourCycle::H12 => {
+                            // h - symbol
+                            fields::Hour::H12
+                        }
+                        // Skeletons only contain the h23, not h24. The pattern that is matched
+                        // is free to use h23 or h24.
+                        preferences::HourCycle::H24 | preferences::HourCycle::H23 => {
+                            // H - symbol
+                            fields::Hour::H23
+                        }
                     },
                     // TODO(#594) - This should default should be the locale default, which is
                     // region-based (h12 for US, h23 for GB, etc). This is in CLDR, but we need

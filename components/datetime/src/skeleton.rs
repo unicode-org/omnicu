@@ -10,7 +10,7 @@ use thiserror::Error;
 
 use crate::{
     fields::{self, Field, FieldLength, FieldSymbol},
-    options::length,
+    options::{length, preferences},
     pattern::{Pattern, PatternItem},
     provider::gregory::patterns::{LengthPatternsV1, PatternV1, SkeletonV1, SkeletonsV1},
 };
@@ -341,6 +341,28 @@ pub enum BestSkeleton<T> {
     NoMatch,
 }
 
+/// The hour cycle can be set by preferences. This function switches between h11 and h12,
+/// and between h23 and h24. This function is naive as it is assumed that this application of
+/// the hour cycle will not change between h1x to h2x.
+fn naively_apply_hour_cycle_preferences(
+    pattern: &mut Pattern,
+    preferences: &Option<preferences::Bag>,
+) {
+    // If there is a preference overiding the hour cycle, apply it now.
+    if let Some(preferences::Bag {
+        hour_cycle: Some(hour_cycle),
+    }) = preferences
+    {
+        for item in pattern.items_mut() {
+            if let PatternItem::Field(fields::Field { symbol, length: _ }) = item {
+                if let fields::FieldSymbol::Hour(_) = symbol {
+                    *symbol = fields::FieldSymbol::Hour(hour_cycle.field());
+                }
+            }
+        }
+    }
+}
+
 // TODO - This could return a Cow<'a, Pattern>, but it affects every other part of the API to
 // add a lifetime here. The pattern returned here could be one that we've already constructed in
 // the CLDR as an exotic type, or it could be one that was modified to meet the requirements of
@@ -349,11 +371,13 @@ pub fn create_best_pattern_for_fields<'a>(
     skeletons: &'a SkeletonsV1,
     length_patterns: &LengthPatternsV1,
     fields: &[Field],
+    preferences: &Option<preferences::Bag>,
 ) -> BestSkeleton<Pattern> {
     let first_pattern_match = get_best_available_format_pattern(skeletons, fields);
 
     // Try to match a skeleton to all of the fields.
-    if let BestSkeleton::AllFieldsMatch(pattern) = first_pattern_match {
+    if let BestSkeleton::AllFieldsMatch(mut pattern) = first_pattern_match {
+        naively_apply_hour_cycle_preferences(&mut pattern, &preferences);
         return BestSkeleton::AllFieldsMatch(pattern);
     }
 
@@ -374,7 +398,10 @@ pub fn create_best_pattern_for_fields<'a>(
             BestSkeleton::AllFieldsMatch(_) => {
                 unreachable!("Logic error in implementation. AllFieldsMatch handled above.")
             }
-            BestSkeleton::MissingOrExtraFields(pattern) => {
+            BestSkeleton::MissingOrExtraFields(mut pattern) => {
+                if date.is_empty() {
+                    naively_apply_hour_cycle_preferences(&mut pattern, &preferences);
+                }
                 BestSkeleton::MissingOrExtraFields(pattern)
             }
             BestSkeleton::NoMatch => BestSkeleton::NoMatch,
@@ -390,12 +417,16 @@ pub fn create_best_pattern_for_fields<'a>(
             BestSkeleton::NoMatch => (None, true),
         };
 
-    let (time_pattern, time_missing_or_extra) =
+    let (mut time_pattern, time_missing_or_extra) =
         match get_best_available_format_pattern(skeletons, &time) {
             BestSkeleton::MissingOrExtraFields(fields) => (Some(fields), true),
             BestSkeleton::AllFieldsMatch(fields) => (Some(fields), false),
             BestSkeleton::NoMatch => (None, true),
         };
+
+    if let Some(ref mut pattern) = time_pattern {
+        naively_apply_hour_cycle_preferences(pattern, &preferences)
+    }
 
     // Determine how to combine the date and time.
     let pattern: Option<Pattern> = match (date_pattern, time_pattern) {
@@ -752,6 +783,7 @@ mod test {
             &data_provider.get().datetime.skeletons,
             &data_provider.get().datetime.length_patterns,
             &requested_fields,
+            &None,
         ) {
             BestSkeleton::AllFieldsMatch(available_format_pattern) => {
                 // TODO - This needs to support the "Z" pattern. This test will begin to fail
