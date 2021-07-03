@@ -66,6 +66,7 @@ category = "CI"
 dependencies = [
     "license-header-check",
     "generated-readme-check",
+    "license-file-check",
 ]
 
 [tasks.ci-job-wasm]

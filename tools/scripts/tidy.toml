@@ -128,3 +128,51 @@ if greater_than ${output_length} 0
     end
 end
 '''
+
+[tasks.copy-license]
+description = "Copy the license file to each component for packaging."
+category = "ICU4X Development"
+script_runner = "@duckscript"
+script = '''
+exit_on_error true
+
+glob_pattern = set "./**/Cargo.toml"
+license = canonicalize LICENSE
+
+handle = glob_array ${glob_pattern}
+for path in ${handle}
+    root_dir = dirname ${path}
+    if not is_empty ${root_dir}
+        echo "Copying LICENSE to ${root_dir}/LICENSE"
+        cp ${license} ${root_dir}/LICENSE
+    end
+end
+'''
+
+[tasks.license-file-check]
+description = "Check that each component has a LICENSE file."
+category = "ICU4X Development"
+script_runner = "@duckscript"
+script = '''
+exit_on_error true
+
+glob_pattern = set "./**/Cargo.toml"
+license = canonicalize LICENSE
+license_text = readfile ${license}
+
+handle = glob_array ${glob_pattern}
+for path in ${handle}
+    root_dir = dirname ${path}
+    if not is_empty ${root_dir}
+        if not is_path_exists ${root_dir}/LICENSE
+            trigger_error "LICENSE file missing in ${root_dir}, run `cargo make copy-license` to copy the license file to all necessary locations."
+        end
+        copy_license_text = readfile ${root_dir}/LICENSE
+        license_equal = eq ${license_text} ${copy_license_text}
+        if not ${license_equal}
+            trigger_error "LICENSE text incorrect in ${root_dir}/LICENSE, run `cargo make copy-license` to copy the license file to all necessary locations."
+        end
+    end
+end
+'''
+
