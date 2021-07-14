@@ -4,6 +4,7 @@
 
 mod error;
 mod parser;
+pub mod transform_hour_cycle;
 
 use crate::fields::{self, Field, FieldLength, FieldSymbol};
 pub use error::Error;
@@ -97,6 +98,10 @@ fn get_time_granularity(item: &PatternItem) -> Option<TimeGranularity> {
 impl Pattern {
     pub fn items(&self) -> &[PatternItem] {
         &self.items
+    }
+
+    pub fn items_mut(&mut self) -> &mut [PatternItem] {
+        &mut self.items
     }
 
     pub fn from_bytes(input: &str) -> Result<Self, Error> {
@@ -279,5 +284,27 @@ impl Serialize for Pattern {
             }
             seq.end()
         }
+    }
+}
+
+/// Used to represent either H11/H12, or H23/H24. Skeletons only store these
+/// hour cycles as H12 or H23.
+#[derive(Debug, PartialEq, Clone, Copy)]
+#[cfg_attr(
+    feature = "provider_serde",
+    derive(serde::Serialize, serde::Deserialize)
+)]
+pub enum CoarseHourCycle {
+    /// Can either be fields::Hour::H11 or fields::Hour::H12
+    H11H12,
+    /// Can either be fields::Hour::H23 or fields::Hour::H24
+    H23H24,
+}
+
+/// Default is required for serialization. H23H24 is the more locale-agnostic choice, as it's
+/// less likely to have a day period in it.
+impl Default for CoarseHourCycle {
+    fn default() -> Self {
+        CoarseHourCycle::H23H24
     }
 }

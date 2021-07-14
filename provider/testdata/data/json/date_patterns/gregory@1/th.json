@@ -5,12 +5,19 @@
     "medium": "d MMM y",
     "short": "d/M/yy"
   },
-  "time": {
+  "time_h11_h12": {
+    "full": "h:mm:ss a",
+    "long": "h:mm:ss a",
+    "medium": "h:mm:ss a",
+    "short": "h:mm a"
+  },
+  "time_h23_h24": {
     "full": "H นาฬิกา mm นาที ss วินาที zzzz",
     "long": "H นาฬิกา mm นาที ss วินาที z",
     "medium": "HH:mm:ss",
     "short": "HH:mm"
   },
+  "preferred_hour_cycle": "H23H24",
   "datetime": {
     "length_patterns": {
       "full": "{1} {0}",

@@ -82,7 +82,6 @@ use serde::{Deserialize, Serialize};
 pub struct Bag {
     pub date: Option<Date>,
     pub time: Option<Time>,
-    #[cfg_attr(feature = "serde", serde(skip_serializing, skip_deserializing))]
     pub preferences: Option<preferences::Bag>,
 }
 

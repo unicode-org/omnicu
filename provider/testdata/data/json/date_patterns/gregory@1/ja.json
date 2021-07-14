@@ -5,12 +5,19 @@
     "medium": "y/MM/dd",
     "short": "y/MM/dd"
   },
-  "time": {
+  "time_h11_h12": {
+    "full": "aK:mm:ss",
+    "long": "aK:mm:ss",
+    "medium": "aK:mm:ss",
+    "short": "aK:mm"
+  },
+  "time_h23_h24": {
     "full": "H時mm分ss秒 zzzz",
     "long": "H:mm:ss z",
     "medium": "H:mm:ss",
     "short": "H:mm"
   },
+  "preferred_hour_cycle": "H23H24",
   "datetime": {
     "length_patterns": {
       "full": "{1} {0}",

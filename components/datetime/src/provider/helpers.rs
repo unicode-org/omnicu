@@ -5,8 +5,8 @@
 use crate::date;
 use crate::error::DateTimeFormatError;
 use crate::fields;
-use crate::options::{components, length, DateTimeFormatOptions};
-use crate::pattern::Pattern;
+use crate::options::{components, length, preferences, DateTimeFormatOptions};
+use crate::pattern::{Pattern, PatternItem};
 use crate::provider;
 use crate::skeleton;
 use std::borrow::Cow;
@@ -21,7 +21,11 @@ pub trait DateTimePatterns {
     ) -> Result<Option<Pattern>>;
     fn get_pattern_for_length_bag(&self, length: &length::Bag) -> Result<Option<Pattern>>;
     fn get_pattern_for_date_length(&self, length: length::Date) -> Result<Pattern>;
-    fn get_pattern_for_time_length(&self, length: length::Time) -> Result<Pattern>;
+    fn get_pattern_for_time_length(
+        &self,
+        length: length::Time,
+        preferences: &Option<preferences::Bag>,
+    ) -> Result<Pattern>;
     fn get_pattern_for_datetime_length(
         &self,
         length: length::Date,
@@ -82,10 +86,12 @@ impl DateTimePatterns for provider::gregory::DatePatternsV1 {
     fn get_pattern_for_length_bag(&self, length: &length::Bag) -> Result<Option<Pattern>> {
         match (length.date, length.time) {
             (None, None) => Ok(None),
-            (None, Some(time_length)) => self.get_pattern_for_time_length(time_length).map(Some),
+            (None, Some(time_length)) => self
+                .get_pattern_for_time_length(time_length, &length.preferences)
+                .map(Some),
             (Some(date_length), None) => self.get_pattern_for_date_length(date_length).map(Some),
             (Some(date_length), Some(time_length)) => {
-                let time = self.get_pattern_for_time_length(time_length)?;
+                let time = self.get_pattern_for_time_length(time_length, &length.preferences)?;
                 let date = self.get_pattern_for_date_length(date_length)?;
 
                 self.get_pattern_for_datetime_length(date_length, date, time)
@@ -121,15 +127,54 @@ impl DateTimePatterns for provider::gregory::DatePatternsV1 {
         Ok(Pattern::from_bytes_combination(s, date, time)?)
     }
 
-    fn get_pattern_for_time_length(&self, length: length::Time) -> Result<Pattern> {
-        let time = &self.time;
-        let s = match length {
+    /// Look up the proper pre-computed pattern for a given length. If a preference for an hour
+    /// cycle is set, it will look look up a pattern in the time_h11_12 or time_h23_h24 provider
+    /// data, and then manually modify the symbol in the pattern if needed.
+    fn get_pattern_for_time_length(
+        &self,
+        length: length::Time,
+        preferences: &Option<preferences::Bag>,
+    ) -> Result<Pattern> {
+        // Determine the coarse hour cycle patterns to use from either the preference bag,
+        // or the preferred hour cycle for the locale.
+        let time = if let Some(preferences::Bag {
+            hour_cycle: Some(hour_cycle_pref),
+        }) = preferences
+        {
+            match hour_cycle_pref {
+                preferences::HourCycle::H11 | preferences::HourCycle::H12 => &self.time_h11_h12,
+                preferences::HourCycle::H23 | preferences::HourCycle::H24 => &self.time_h23_h24,
+            }
+        } else {
+            match self.preferred_hour_cycle {
+                crate::pattern::CoarseHourCycle::H11H12 => &self.time_h11_h12,
+                crate::pattern::CoarseHourCycle::H23H24 => &self.time_h23_h24,
+            }
+        };
+
+        let mut pattern = Pattern::from_bytes(match length {
             length::Time::Full => &time.full,
             length::Time::Long => &time.long,
             length::Time::Medium => &time.medium,
             length::Time::Short => &time.short,
-        };
-        Ok(Pattern::from_bytes(s)?)
+        })?;
+
+        if let Some(preferences::Bag {
+            hour_cycle: Some(hour_cycle_pref),
+        }) = preferences
+        {
+            // Apply the preference::Bag override and change the pattern from a coarse hour cycle
+            // to the specific hour cycle.
+            for item in pattern.items_mut() {
+                if let PatternItem::Field(fields::Field { symbol, length: _ }) = item {
+                    if let fields::FieldSymbol::Hour(_) = symbol {
+                        *symbol = fields::FieldSymbol::Hour(hour_cycle_pref.field());
+                    }
+                }
+            }
+        }
+
+        Ok(pattern)
     }
 }
 

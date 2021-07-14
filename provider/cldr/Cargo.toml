@@ -36,7 +36,7 @@ all-features = true
 icu_provider = { version = "0.2", path = "../../provider/core", features = ["provider_serde"] }
 icu_locid = { version = "0.2", path = "../../components/locid" }
 icu_plurals = { version = "0.2", path = "../../components/plurals" }
-icu_datetime = { version = "0.2", path = "../../components/datetime" }
+icu_datetime = { version = "0.2", path = "../../components/datetime", features = ["provider_transform_internals"] }
 icu_locale_canonicalizer = { version = "0.2", path = "../../components/locale_canonicalizer" }
 icu_decimal = { version = "0.2", path = "../../components/decimal" }
 itertools = "0.10"

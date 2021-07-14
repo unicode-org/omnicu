@@ -7,7 +7,8 @@ use crate::cldr_langid::CldrLangID;
 use crate::error::Error;
 use crate::reader::{get_subdirectories, open_reader};
 use crate::CldrPaths;
-use icu_datetime::{provider::*, skeleton::SkeletonError};
+use icu_datetime::pattern::CoarseHourCycle;
+use icu_datetime::{pattern, provider::*, skeleton::SkeletonError};
 use icu_provider::iter::{IterableDataProviderCore, KeyedDataProvider};
 use icu_provider::prelude::*;
 use std::borrow::Cow;
@@ -182,9 +183,100 @@ impl From<&cldr_json::DateTimeFormats> for gregory::patterns::DateTimeFormatsV1 
 
 impl From<&cldr_json::Dates> for gregory::DatePatternsV1 {
     fn from(other: &cldr_json::Dates) -> Self {
+        let date_time_formats_v1 =
+            gregory::patterns::DateTimeFormatsV1::from(&other.calendars.gregorian.datetime_formats);
+
+        let pattern_str_full = other.calendars.gregorian.time_formats.full.get_pattern();
+        let pattern_str_long = other.calendars.gregorian.time_formats.long.get_pattern();
+        let pattern_str_medium = other.calendars.gregorian.time_formats.medium.get_pattern();
+        let pattern_str_short = other.calendars.gregorian.time_formats.short.get_pattern();
+
+        let pattern_full = pattern::Pattern::from_bytes(pattern_str_full)
+            .expect("Failed to create a full Pattern from bytes.");
+        let pattern_long = pattern::Pattern::from_bytes(pattern_str_long)
+            .expect("Failed to create a long Pattern from bytes.");
+        let pattern_medium = pattern::Pattern::from_bytes(pattern_str_medium)
+            .expect("Failed to create a medium Pattern from bytes.");
+        let pattern_short = pattern::Pattern::from_bytes(pattern_str_short)
+            .expect("Failed to create a short Pattern from bytes.");
+
+        let mut preferred_hour_cycle: Option<CoarseHourCycle> = None;
+        for hour_cycle in [
+            pattern::transform_hour_cycle::determine_coarse_hour_cycle(&pattern_full),
+            pattern::transform_hour_cycle::determine_coarse_hour_cycle(&pattern_long),
+            pattern::transform_hour_cycle::determine_coarse_hour_cycle(&pattern_medium),
+            pattern::transform_hour_cycle::determine_coarse_hour_cycle(&pattern_short),
+        ]
+        .iter()
+        {
+            if let Some(hour_cycle) = hour_cycle {
+                if let Some(preferred_hour_cycle) = preferred_hour_cycle {
+                    assert_eq!(
+                        *hour_cycle, preferred_hour_cycle,
+                        "A locale contained a mix of flexible hour cycle types"
+                    );
+                } else {
+                    preferred_hour_cycle = Some(*hour_cycle);
+                }
+            }
+        }
+
+        let preferred_hour_cycle =
+            preferred_hour_cycle.expect("Could not find a preferred hour cycle.");
+        let alt_hour_cycle = if preferred_hour_cycle == CoarseHourCycle::H11H12 {
+            CoarseHourCycle::H23H24
+        } else {
+            CoarseHourCycle::H11H12
+        };
+
+        let (time_h11_h12, time_h23_h24) = {
+            let time = (&other.calendars.gregorian.time_formats).into();
+            let alt_time = gregory::patterns::LengthPatternsV1 {
+                full: pattern::transform_hour_cycle::apply_coarse_hour_cycle(
+                    &date_time_formats_v1,
+                    &pattern_str_full,
+                    pattern_full,
+                    alt_hour_cycle,
+                )
+                .expect("Failed to apply a coarse hour cycle to a full pattern.")
+                .into(),
+                long: pattern::transform_hour_cycle::apply_coarse_hour_cycle(
+                    &date_time_formats_v1,
+                    &pattern_str_long,
+                    pattern_long,
+                    alt_hour_cycle,
+                )
+                .expect("Failed to apply a coarse hour cycle to a long pattern.")
+                .into(),
+                medium: pattern::transform_hour_cycle::apply_coarse_hour_cycle(
+                    &date_time_formats_v1,
+                    &pattern_str_medium,
+                    pattern_medium,
+                    alt_hour_cycle,
+                )
+                .expect("Failed to apply a coarse hour cycle to a medium pattern.")
+                .into(),
+                short: pattern::transform_hour_cycle::apply_coarse_hour_cycle(
+                    &date_time_formats_v1,
+                    &pattern_str_short,
+                    pattern_short,
+                    alt_hour_cycle,
+                )
+                .expect("Failed to apply a coarse hour cycle to a short pattern.")
+                .into(),
+            };
+
+            match preferred_hour_cycle {
+                CoarseHourCycle::H11H12 => (time, alt_time),
+                CoarseHourCycle::H23H24 => (alt_time, time),
+            }
+        };
+
         Self {
             date: (&other.calendars.gregorian.date_formats).into(),
-            time: (&other.calendars.gregorian.time_formats).into(),
+            time_h11_h12,
+            time_h23_h24,
+            preferred_hour_cycle,
             datetime: (&other.calendars.gregorian.datetime_formats).into(),
         }
     }

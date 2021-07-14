@@ -46,6 +46,9 @@
 //!   when running `cargo bench`.
 //! - `experimental`: Whether to enable experimental preview features. Modules enabled with
 //!   this feature may not be production-ready and could change at any time.
+//! - `provider_transform_internals`: This is code that is useful for transforming CLDR data, but
+//!   may be risky to ship as a public API. For instance in DateTimeFormat code we may want to
+//!   manipulate patterns, but not allow end users to do the same.
 //!
 //! # Example
 //!

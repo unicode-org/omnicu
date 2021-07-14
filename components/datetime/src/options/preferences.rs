@@ -51,7 +51,7 @@ pub struct Bag {
 #[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum HourCycle {
-    /// Hour is formatted to be in range 1-24
+    /// Hour is formatted to be in range 1-24 where midnight is 24:00.
     ///
     /// # Examples
     ///
@@ -63,7 +63,7 @@ pub enum HourCycle {
     /// ```
     #[cfg_attr(feature = "serde", serde(rename = "h24"))]
     H24,
-    /// Hour is formatted to be in range 0-23
+    /// Hour is formatted to be in range 0-23 where midnight is 00:00.
     ///
     /// # Examples
     ///
@@ -75,7 +75,7 @@ pub enum HourCycle {
     /// ```
     #[cfg_attr(feature = "serde", serde(rename = "h23"))]
     H23,
-    /// Hour is formatted to be in range 1-12
+    /// Hour is formatted to be in range 1-12 where midnight is 12:00.
     ///
     /// # Examples
     ///
@@ -87,7 +87,7 @@ pub enum HourCycle {
     /// ```
     #[cfg_attr(feature = "serde", serde(rename = "h12"))]
     H12,
-    /// Hour is formatted to be in range 0-11
+    /// Hour is formatted to be in range 0-11 where midnight is 00:00.
     ///
     /// # Examples
     ///

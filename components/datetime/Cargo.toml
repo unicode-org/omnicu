@@ -57,6 +57,7 @@ bench = false  # This option is required for Benchmark CI
 default = ["provider_serde"]
 bench = []
 provider_serde = ["serde", "litemap/serde"]
+provider_transform_internals = []
 
 [[bench]]
 name = "datetime"

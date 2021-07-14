@@ -166,9 +166,11 @@ fn test_dayperiod_patterns() {
                 let datetime: MockDateTime = dt_input.parse().unwrap();
                 for DayPeriodExpectation { patterns, expected } in &test_case.expectations {
                     for pattern_input in patterns {
-                        let new_pattern_cow = Cow::Owned(pattern_input.to_string());
+                        let new_pattern_cow1 = Cow::Owned(pattern_input.to_string());
+                        let new_pattern_cow2 = Cow::Owned(pattern_input.to_string());
                         patterns_data.with_mut(move |data| {
-                            data.time.long = new_pattern_cow;
+                            data.time_h11_h12.long = new_pattern_cow1;
+                            data.time_h23_h24.long = new_pattern_cow2;
                         });
                         let provider = MultiKeyStructProvider {
                             symbols: StructProvider {
@@ -248,9 +250,11 @@ fn test_time_zone_patterns() {
 
         for TimeZoneExpectation { patterns, expected } in &test.expectations {
             for pattern_input in patterns {
-                let new_pattern_cow = Cow::Owned(pattern_input.to_string());
+                let new_pattern_cow1 = Cow::Owned(pattern_input.to_string());
+                let new_pattern_cow2 = Cow::Owned(pattern_input.to_string());
                 patterns_data.with_mut(move |data| {
-                    data.time.long = new_pattern_cow;
+                    data.time_h11_h12.long = new_pattern_cow1;
+                    data.time_h23_h24.long = new_pattern_cow2;
                 });
                 let date_provider = MultiKeyStructProvider {
                     symbols: StructProvider {
@@ -300,6 +304,12 @@ fn test_length_fixtures() {
             ..TimeZoneConfig::default()
         },
     );
+}
+
+#[test]
+fn test_lengths_with_preferences() {
+    // components/datetime/tests/fixtures/tests/lengths_with_preferences.json
+    test_fixture("lengths_with_preferences");
 }
 
 /// Tests component::Bag configurations that have exact matches to CLDR skeletons.

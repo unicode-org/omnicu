@@ -2,6 +2,7 @@
 // called LICENSE at the top level of the ICU4X source tree
 // (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).
 
+use crate::pattern;
 use icu_provider::yoke::{self, *};
 use std::borrow::Cow;
 
@@ -30,7 +31,18 @@ pub struct DateSymbolsV1 {
 pub struct DatePatternsV1 {
     pub date: patterns::LengthPatternsV1,
 
-    pub time: patterns::LengthPatternsV1,
+    /// These patterns are common uses of time formatting, broken down by the length of the
+    /// pattern. Users can override the hour cycle with a preference, so there are two
+    /// pattern groups stored here. Note that the pattern will contain either h11 or h12.
+    pub time_h11_h12: patterns::LengthPatternsV1,
+
+    /// These patterns are common uses of time formatting, broken down by the length of the
+    /// pattern. Users can override the hour cycle with a preference, so there are two
+    /// pattern groups stored here. Note that the pattern will contain either h23 or h24.
+    pub time_h23_h24: patterns::LengthPatternsV1,
+
+    /// By default a locale will prefer one hour cycle type over another.
+    pub preferred_hour_cycle: pattern::CoarseHourCycle,
 
     pub datetime: patterns::DateTimeFormatsV1,
 }

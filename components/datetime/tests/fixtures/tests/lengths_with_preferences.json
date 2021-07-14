@@ -1,0 +1,138 @@
+[
+  {
+      "description": "Hour cycle preference h12",
+      "input": {
+          "locale": "en",
+          "value": "2020-02-20T00:12:00.000",
+          "options": {
+              "length": {
+                  "time": "medium",
+                  "date": "medium",
+                  "preferences": { "hourCycle": "h12" }
+              }
+          }
+      },
+      "output": {
+          "value": "Feb 20, 2020, 12:12:00 AM"
+      }
+  },
+  {
+      "description": "Hour cycle preference h24",
+      "input": {
+          "locale": "en",
+          "value": "2020-02-20T00:12:00.000",
+          "options": {
+              "length": {
+                  "time": "medium",
+                  "date": "medium",
+                  "preferences": { "hourCycle": "h24" }
+              }
+          }
+      },
+      "output": {
+          "value": "Feb 20, 2020, 24:12:00"
+      }
+  },
+  {
+      "description": "Hour cycle preference h11",
+      "input": {
+          "locale": "en",
+          "value": "2020-02-20T00:12:00.000",
+          "options": {
+              "length": {
+                  "time": "medium",
+                  "date": "medium",
+                  "preferences": { "hourCycle": "h11" }
+              }
+          }
+      },
+      "output": {
+          "value": "Feb 20, 2020, 0:12:00 AM"
+      }
+  },
+  {
+      "description": "Hour cycle preference h23",
+      "input": {
+          "locale": "en",
+          "value": "2020-02-20T00:12:00.000",
+          "options": {
+              "length": {
+                  "time": "medium",
+                  "date": "medium",
+                  "preferences": { "hourCycle": "h23" }
+              }
+          }
+      },
+      "output": {
+          "value": "Feb 20, 2020, 00:12:00"
+      }
+  },
+  {
+    "description": "Japan hour cycles use h11",
+    "input": {
+        "locale": "ja",
+        "value": "2020-02-20T00:12:00.000",
+        "options": {
+            "length": {
+                "time": "medium",
+                "date": "full",
+                "preferences": { "hourCycle": "h11" }
+            }
+        }
+    },
+    "output": {
+        "value": "2020年2月20日木曜日 午前0:12:00"
+    }
+  },
+  {
+    "description": "Japan hour cycles use h12",
+    "input": {
+        "locale": "ja",
+        "value": "2020-02-20T00:12:00.000",
+        "options": {
+            "length": {
+                "time": "medium",
+                "date": "full",
+                "preferences": { "hourCycle": "h12" }
+            }
+        }
+    },
+    "output": {
+        "value": "2020年2月20日木曜日 午前12:12:00"
+    }
+  },
+  {
+    "description": "Japan hour cycles can use h24",
+    "input": {
+        "locale": "ja",
+        "value": "2020-02-20T00:12:00.000",
+        "options": {
+            "length": {
+                "time": "medium",
+                "date": "full",
+                "preferences": { "hourCycle": "h24" }
+            }
+        }
+    },
+    "output": {
+        "value": "2020年2月20日木曜日 24:12:00"
+    }
+ },
+ {
+    "description": "Japan hour cycles prefer h23",
+    "input": {
+        "locale": "ja",
+        "value": "2020-02-20T00:12:00.000",
+        "options": {
+            "length": {
+                "time": "medium",
+                "date": "full",
+                "preferences": { "hourCycle": "h23" }
+            }
+        }
+    },
+    "output": {
+        "value": "2020年2月20日木曜日 0:12:00"
+    }
+  }
+]
