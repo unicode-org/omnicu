@@ -22,6 +22,9 @@ include = [
     "README.md"
 ]
 
+[package.metadata.cargo-all-features]
+skip_optional_dependencies = true
+
 [package.metadata.docs.rs]
 all-features = true
 
@@ -30,6 +33,7 @@ smallvec = "1.6"
 static_assertions = "1.1"
 writeable = { version = "0.2", path = "../../utils/writeable" }
 thiserror = "1.0"
+ryu_floating_decimal = { version = "0.1.0", optional = true }
 
 [dev-dependencies]
 criterion = "0.3.4"
@@ -45,6 +49,8 @@ path = "src/lib.rs"
 
 [features]
 default = []
+
+ryu_decimal = ["ryu_floating_decimal"]
 
 bench = []
 

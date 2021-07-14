@@ -51,6 +51,8 @@ fn overview_bench(c: &mut Criterion) {
         larger_isize_benches(c);
         to_string_benches(c);
         from_string_benches(c);
+        from_float_ryu_benches(c);
+        from_double_ryu_benches(c);
     }
 }
 
@@ -157,6 +159,60 @@ fn from_string_benches(c: &mut Criterion) {
                 BenchmarkId::from_parameter(object.to_string()),
                 object,
                 |b, object| b.iter(|| FixedDecimal::from_str(object).unwrap()),
+            );
+        }
+        group.finish();
+    }
+}
+
+#[cfg(feature = "bench")]
+fn from_float_ryu_benches(c: &mut Criterion) {
+    use criterion::BenchmarkId;
+
+    let objects = [
+        12.34,
+        0.001221673434,
+        234256110.0,
+        -123400.0,
+        123.45,
+        0.000000001,
+        10001.0,
+    ];
+
+    {
+        let mut group = c.benchmark_group("from_float_ryu");
+        for object in objects.iter() {
+            group.bench_with_input(
+                BenchmarkId::from_parameter(object.to_string()),
+                object,
+                |b, object| b.iter(|| FixedDecimal::from_float_ryu(*object, 10).unwrap()),
+            );
+        }
+        group.finish();
+    }
+}
+
+#[cfg(feature = "bench")]
+fn from_double_ryu_benches(c: &mut Criterion) {
+    use criterion::BenchmarkId;
+
+    let objects = [
+        12.34,
+        0.001221673434,
+        2342561123400.0,
+        -123400.0,
+        1234.56789,
+        0.000000001,
+        1000000001.0,
+    ];
+
+    {
+        let mut group = c.benchmark_group("from_double_ryu");
+        for object in objects.iter() {
+            group.bench_with_input(
+                BenchmarkId::from_parameter(object.to_string()),
+                object,
+                |b, object| b.iter(|| FixedDecimal::from_double_ryu(*object, 10).unwrap()),
             );
         }
         group.finish();
