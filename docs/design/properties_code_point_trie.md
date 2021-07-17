@@ -22,6 +22,12 @@ String Properties return a code point or sequence of code points. Numeric proper
 
  For returning useful properties to the user, we should exclude contributory and provisional properties from APIs.
 
+### Notes About Properties
+
+As [it is defined](https://www.unicode.org/reports/tr44/#General_Category_Values), the General_Category property of a code point "provides for the most general classification of that code point. It is usually determined based on the primary characteristic of the assigned character for that code point. For example, is the character a letter, a mark, a number, punctuation, or a symbol, and if so, of what type?" In the same section 5.7.1 of UAX #44, a table lists the values, including aliases (LC, L, M, N, P, S, Z, C) representing the union of multiple other values. For example, the long name of the value N is Number, which is the union of Nd (Decimal_Number), Nl (Letter_Number), and No (Other_Number). These aliases are provided as separate multi-value constants. Any one code point has one GeneralCategory. The multi-value constants are handy for "is the character a letter or number" etc. testing. TODO: Decide bit set integers vs. something like EnumSet, see PR comment.
+
+The [Lead_Canonical_Combining_Class](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4c/uchar_8h.html#ae40d616419e74ecc7c80a9febab03199a686db169e8d6dc82233ebdfdee777b5a) and [Trail_Canonical_Combining_Class](https://unicode-org.github.io/icu-docs/apidoc/dev/icu4c/uchar_8h.html#ae40d616419e74ecc7c80a9febab03199a477985deea2b2c42f3af4c7174c60d6c) properties are ICU-specific properties that are useful for the implementation of algorithms. They are likely not generally useful for end-users.
+
 ### PPUCD
 
 The [Preparsed UCD](http://site.icu-project.org/design/props/ppucd) file combines multiple sources of information about Unicode characters -- mostly from the [Unicode Character Database](http://www.unicode.org/ucd/), but also from other sources, and does not include all UCD data. PPUCD is designed to be a more compact, easier-to-parse representation of the most commonly used property information.

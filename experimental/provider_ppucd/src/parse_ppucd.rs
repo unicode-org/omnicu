@@ -5,9 +5,9 @@
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::iter::Iterator;
+use std::str::FromStr;
 use std::u32;
 
-use crate::enum_prop_mapping::get_prop_name_identifier;
 use crate::support::UnicodeProperties;
 use icu_uniset::provider::UnicodePropertyV1;
 use icu_uniset::{UnicodeSet, UnicodeSetBuilder};
@@ -351,16 +351,20 @@ fn get_enum_prop_unisets<'s>(
 
     let mut result: HashMap<Cow<'s, TinyStr16>, UnicodeSet> = HashMap::new();
 
-    // Insert UnicodeSets into `result`, with a key like `"5=10"` that
-    // is the integer representation of the Rust enums for the Unicode
+    // Insert UnicodeSets into `result`, with a key like `"gc=Lo"` that
+    // represents the combination of the Unicode
     // enumerated property name (`gc` or `General_Category`) and the Unicode
     // enumerated property value (`Lo` or `Other_letter`).
+    // Note: because we want to revert the use of enum integer values in the
+    // key in favor of the Unicode property short aliases, the key strings
+    // longer than the length of TinyStr16 will not be included in the parsed
+    // result.
     for (canonical_prop_name, prop_val_builder_map) in m {
         for (canonical_val_name, uniset_builder) in prop_val_builder_map {
-            let enum_val_uniset_name =
-                get_prop_name_identifier(canonical_prop_name, canonical_val_name);
-            if let Some(name_str) = enum_val_uniset_name {
-                let enum_val_uniset_name: Cow<'s, TinyStr16> = Cow::Owned(name_str);
+            let uniset_name_result =
+                TinyStr16::from_str(&format!("{}={}", canonical_prop_name, canonical_val_name));
+            if let Ok(uniset_name) = uniset_name_result {
+                let enum_val_uniset_name: Cow<'s, TinyStr16> = Cow::Owned(uniset_name);
                 let uniset = uniset_builder.build();
                 result.insert(enum_val_uniset_name, uniset);
             }
@@ -880,12 +884,12 @@ mod gen_properties_test {
         // Expected
         let mut exp_uni_props_set: HashSet<UnicodePropertyV1> = HashSet::new();
         let gc_lo = UnicodePropertyV1 {
-            name: Cow::Borrowed("5=10"),
+            name: Cow::Borrowed("gc=Lo"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5906]).unwrap(),
         };
         exp_uni_props_set.insert(gc_lo);
         let gc_mn = UnicodePropertyV1 {
-            name: Cow::Borrowed("5=16"),
+            name: Cow::Borrowed("gc=Mn"),
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(gc_mn);
@@ -905,52 +909,42 @@ mod gen_properties_test {
         };
         exp_uni_props_set.insert(ids);
         let insc_consonant = UnicodePropertyV1 {
-            name: Cow::Borrowed("9=4"),
+            name: Cow::Borrowed("InSC=Consonant"),
             inv_list: UnicodeSet::from_inversion_list(vec![5891, 5901, 5902, 5906]).unwrap(),
         };
         exp_uni_props_set.insert(insc_consonant);
-        let insc_vowel_independent = UnicodePropertyV1 {
-            name: Cow::Borrowed("9=35"),
-            inv_list: UnicodeSet::from_inversion_list(vec![5888, 5891]).unwrap(),
-        };
-        exp_uni_props_set.insert(insc_vowel_independent);
-        let insc_vowel_dependent = UnicodePropertyV1 {
-            name: Cow::Borrowed("9=34"),
-            inv_list: UnicodeSet::from_inversion_list(vec![5906, 5908]).unwrap(),
-        };
-        exp_uni_props_set.insert(insc_vowel_dependent);
         let insc_pure_killer = UnicodePropertyV1 {
-            name: Cow::Borrowed("9=26"),
+            name: Cow::Borrowed("InSC=Pure_Killer"),
             inv_list: UnicodeSet::from_inversion_list(vec![5908, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(insc_pure_killer);
         let lb_al = UnicodePropertyV1 {
-            name: Cow::Borrowed("12=1"),
+            name: Cow::Borrowed("lb=AL"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5906]).unwrap(),
         };
         exp_uni_props_set.insert(lb_al);
         let lb_cm = UnicodePropertyV1 {
-            name: Cow::Borrowed("12=9"),
+            name: Cow::Borrowed("lb=CM"),
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(lb_cm);
         let sb_le = UnicodePropertyV1 {
-            name: Cow::Borrowed("19=5"),
+            name: Cow::Borrowed("SB=LE"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5906]).unwrap(),
         };
         exp_uni_props_set.insert(sb_le);
         let sb_ex = UnicodePropertyV1 {
-            name: Cow::Borrowed("19=3"),
+            name: Cow::Borrowed("SB=EX"),
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(sb_ex);
         let wb_le = UnicodePropertyV1 {
-            name: Cow::Borrowed("22=11"),
+            name: Cow::Borrowed("WB=LE"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5906]).unwrap(),
         };
         exp_uni_props_set.insert(wb_le);
         let wb_extend = UnicodePropertyV1 {
-            name: Cow::Borrowed("22=6"),
+            name: Cow::Borrowed("WB=Extend"),
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(wb_extend);
@@ -965,12 +959,12 @@ mod gen_properties_test {
         };
         exp_uni_props_set.insert(xids);
         let bc_l = UnicodePropertyV1 {
-            name: Cow::Borrowed("0=9"),
+            name: Cow::Borrowed("bc=L"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5906]).unwrap(),
         };
         exp_uni_props_set.insert(bc_l);
         let bc_nsm = UnicodePropertyV1 {
-            name: Cow::Borrowed("0=13"),
+            name: Cow::Borrowed("bc=NSM"),
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(bc_nsm);
@@ -980,12 +974,12 @@ mod gen_properties_test {
         };
         exp_uni_props_set.insert(ci);
         let gcb_ex = UnicodePropertyV1 {
-            name: Cow::Borrowed("6=5"),
+            name: Cow::Borrowed("GCB=EX"),
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(gcb_ex);
         let gcb_xx = UnicodePropertyV1 {
-            name: Cow::Borrowed("6=16"),
+            name: Cow::Borrowed("GCB=XX"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5906]).unwrap(),
         };
         exp_uni_props_set.insert(gcb_xx);
@@ -994,29 +988,29 @@ mod gen_properties_test {
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(gr_ext);
-        let inpc_al = UnicodePropertyV1 {
-            name: Cow::Borrowed("8=5"),
+        let inpc_na = UnicodePropertyV1 {
+            name: Cow::Borrowed("InPC=NA"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5906]).unwrap(),
         };
-        exp_uni_props_set.insert(inpc_al);
+        exp_uni_props_set.insert(inpc_na);
         let inpc_top = UnicodePropertyV1 {
-            name: Cow::Borrowed("8=8"),
+            name: Cow::Borrowed("InPC=Top"),
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5907]).unwrap(),
         };
         exp_uni_props_set.insert(inpc_top);
         let inpc_bottom = UnicodePropertyV1 {
-            name: Cow::Borrowed("8=0"),
+            name: Cow::Borrowed("InPC=Bottom"),
             inv_list: UnicodeSet::from_inversion_list(vec![5907, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(inpc_bottom);
 
         let jt_u = UnicodePropertyV1 {
-            name: Cow::Borrowed("11=5"),
+            name: Cow::Borrowed("jt=U"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5906]).unwrap(),
         };
         exp_uni_props_set.insert(jt_u);
         let jt_t = UnicodePropertyV1 {
-            name: Cow::Borrowed("11=4"),
+            name: Cow::Borrowed("jt=T"),
             inv_list: UnicodeSet::from_inversion_list(vec![5906, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(jt_t);
@@ -1026,57 +1020,52 @@ mod gen_properties_test {
         };
         exp_uni_props_set.insert(alpha);
         let nfd_qc_y = UnicodePropertyV1 {
-            name: Cow::Borrowed("15=1"),
+            name: Cow::Borrowed("NFD_QC=Y"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(nfd_qc_y);
         let nfc_qc_y = UnicodePropertyV1 {
-            name: Cow::Borrowed("14=2"),
+            name: Cow::Borrowed("NFC_QC=Y"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(nfc_qc_y);
         let nfkd_qc_y = UnicodePropertyV1 {
-            name: Cow::Borrowed("17=1"),
+            name: Cow::Borrowed("NFKD_QC=Y"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(nfkd_qc_y);
         let nfkc_qc_y = UnicodePropertyV1 {
-            name: Cow::Borrowed("16=2"),
+            name: Cow::Borrowed("NFKC_QC=Y"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(nfkc_qc_y);
-        let jg_no_joining_group = UnicodePropertyV1 {
-            name: Cow::Borrowed("10=71"),
-            inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
-        };
-        exp_uni_props_set.insert(jg_no_joining_group);
         let dt_none = UnicodePropertyV1 {
-            name: Cow::Borrowed("3=11"),
+            name: Cow::Borrowed("dt=None"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(dt_none);
         let nt_none = UnicodePropertyV1 {
-            name: Cow::Borrowed("18=2"),
+            name: Cow::Borrowed("nt=None"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(nt_none);
         let ea_n = UnicodePropertyV1 {
-            name: Cow::Borrowed("4=3"),
+            name: Cow::Borrowed("ea=N"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(ea_n);
         let vo_r = UnicodePropertyV1 {
-            name: Cow::Borrowed("21=0"),
+            name: Cow::Borrowed("vo=R"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(vo_r);
         let ccc_9 = UnicodePropertyV1 {
-            name: Cow::Borrowed("2=9"),
+            name: Cow::Borrowed("ccc=9"),
             inv_list: UnicodeSet::from_inversion_list(vec![5908, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(ccc_9);
         let hst_na = UnicodePropertyV1 {
-            name: Cow::Borrowed("7=3"),
+            name: Cow::Borrowed("hst=NA"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(hst_na);
@@ -1086,7 +1075,7 @@ mod gen_properties_test {
         };
         exp_uni_props_set.insert(gr_link);
         let bpt_n = UnicodePropertyV1 {
-            name: Cow::Borrowed("1=1"),
+            name: Cow::Borrowed("bpt=n"),
             inv_list: UnicodeSet::from_inversion_list(vec![5888, 5901, 5902, 5909]).unwrap(),
         };
         exp_uni_props_set.insert(bpt_n);
@@ -1097,15 +1086,22 @@ mod gen_properties_test {
         let act_uni_props_names_set: HashSet<Cow<str>> =
             act_uni_props_set.iter().map(|p| p.name.clone()).collect();
         let names_diff = act_uni_props_names_set.difference(&exp_uni_props_names_set);
+        let names_diff_2 = exp_uni_props_names_set.difference(&act_uni_props_names_set);
         let names_diff_str = names_diff
+            .into_iter()
+            .cloned()
+            .collect::<Vec<Cow<str>>>()
+            .join(", ");
+        let names_diff_str_2 = names_diff_2
             .into_iter()
             .cloned()
             .collect::<Vec<Cow<str>>>()
             .join(", ");
         assert_eq!(
             exp_uni_props_names_set, act_uni_props_names_set,
-            "**** prop names missing in exp but in act = {}",
-            names_diff_str
+            "**** prop names missing in exp but in act = {}
+            **** prop names missing in act but in exp = {}",
+            names_diff_str, names_diff_str_2,
         );
 
         // full assertion
