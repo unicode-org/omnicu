@@ -839,6 +839,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "icu_benchmark_binsize"
+version = "0.1.0"
+dependencies = [
+ "cargo_metadata",
+ "clap",
+ "serde_json",
+]
+
+[[package]]
 name = "icu_benchmark_macros"
 version = "0.2.0"
 dependencies = [

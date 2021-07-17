@@ -29,6 +29,7 @@ members = [
     "provider/testdata",
     "tools/benchmark/macros",
     "tools/benchmark/memory",
+    "tools/benchmark/binsize",
     "tools/datagen",
     "utils/fixed_decimal",
     "utils/litemap",

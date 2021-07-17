@@ -13,11 +13,7 @@ name: Build and Test
 # Clippy is special because we're using actions-rs/clippy-check which is able to surface clippy failures on
 # PR bodies
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: '*'
+on: [push]
 
 jobs:
 
@@ -660,3 +656,71 @@ jobs:
         publish_branch: gh-pages
         publish_dir: copy-to-ext-repo
         commit_message: Rust API docs + benchmark dashboards -> GH Pages
+
+  # Experimental: binary size benchmark
+
+  binsize:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: Get cargo-make version
+      id: cargo-make-version
+      run: |
+        echo "::set-output name=hash::$(cargo search cargo-make | grep '^cargo-make =' | md5sum)"
+      shell: bash
+    - name: Attempt to load cached cargo-make
+      uses: actions/cache@v2
+      id: cargo-make-cache
+      with:
+        path: |
+          ~/.cargo/bin/cargo-make
+          ~/.cargo/bin/cargo-make.exe
+        key: ${{ runner.os }}-${{ steps.cargo-make-version.outputs.hash }}
+    - name: Install cargo-make
+      if: steps.cargo-make-cache.outputs.cache-hit != 'true'
+      uses: actions-rs/install@v0.1.2
+      with:
+        crate: cargo-make
+        version: latest
+
+    - name: Install prerequisites for wasm build
+      run: |
+        rustup component add rust-src
+        rustup toolchain list
+        rustup toolchain install nightly-2021-02-28
+        sudo npm install -g wasm-opt --unsafe-perm
+        sudo npm install -g wabt
+        cargo install twiggy
+
+    - name: Setup output data directory
+      run: mkdir -p benchmarks/binsize
+
+    - name: Build wasm executables and measure size
+      run: |
+        cargo make wasm-examples
+        cargo run --package icu_benchmark_binsize | tee benchmarks/binsize/output.txt
+        ls -l benchmarks/binsize
+        cat benchmarks/binsize/output.txt
+
+    - name: Store benchmark result
+      uses: rhysd/github-action-benchmark@v1
+      with:
+        tool: 'cargo'
+        output-file-path: benchmarks/binsize/output.txt
+        benchmark-data-dir-path: ./benchmarks/binsize
+        alert-threshold: '100%'
+        fail-on-alert: true
+        gh-pages-branch: gh-pages
+        auto-push: true
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        comment-on-alert: true
+
+    - name: Switch branch to get result of binsize output.
+      run: git checkout gh-pages
+
+    - name: Upload binsize data
+      uses: actions/upload-artifact@v2
+      with:
+        path: ./benchmarks/binsize/**
+        name: benchmark-binsize
