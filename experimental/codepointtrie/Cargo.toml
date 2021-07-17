@@ -1,0 +1,42 @@
+# This file is part of ICU4X. For terms of use, please see the file
+# called LICENSE at the top level of the ICU4X source tree
+# (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).
+
+[package]
+name = "icu_codepointtrie"
+description = "API for an efficient trie of data for Unicode code points"
+version = "0.2.0"
+authors = ["The ICU4X Project Developers"]
+edition = "2018"
+readme = "README.md"
+repository = "https://github.com/unicode-org/icu4x"
+license-file = "../../LICENSE"
+categories = ["internationalization"]
+# Keep this in sync with other crates unless there are exceptions
+include = [
+    "src/**/*",
+    "examples/**/*",
+    "benches/**/*",
+    "tests/**/*",
+    "Cargo.toml",
+    "README.md"
+]
+
+[lib]
+bench = false  # This option is required for Benchmark CI
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"], optional = true }
+thiserror = "1.0"
+zerovec = { version = "0.2", path = "../../utils/zerovec" }
+
+[features]
+default = ["provider_serde"]
+bench = []
+provider_serde = ["serde", "zerovec/serde"]
+
+[dev-dependencies]
+toml = "0.5"
+serde = { version = "1.0", features = ["derive"] }
+zerovec = { version = "0.2", path = "../../utils/zerovec", features = ["serde"] }

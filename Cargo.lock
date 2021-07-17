@@ -877,6 +877,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "icu_codepointtrie"
+version = "0.2.0"
+dependencies = [
+ "serde",
+ "thiserror",
+ "toml",
+ "zerovec",
+]
+
+[[package]]
 name = "icu_datagen"
 version = "0.2.0"
 dependencies = [
