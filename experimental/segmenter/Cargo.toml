@@ -25,8 +25,8 @@ include = [
 [dependencies]
 unicode-width = "0.1.7"
 icu_segmenter_lstm = { version = "0.1", path = "../segmenter_lstm" }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 lazy_static = "1.0"
 
 [dev-dependencies]

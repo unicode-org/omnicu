@@ -9,9 +9,13 @@
 //!
 //! See the documentation of [`Yoke`] for more details.
 
+#![no_std]
 // The lifetimes here are important for safety and explicitly writing
 // them out is good even when redundant
 #![allow(clippy::needless_lifetimes)]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 mod macro_impls;
 pub mod trait_hack;

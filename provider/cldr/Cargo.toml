@@ -42,13 +42,13 @@ icu_decimal = { version = "0.2", path = "../../components/decimal" }
 itertools = "0.10"
 json = "0.12"
 litemap = { version = "0.2", path = "../../utils/litemap" }
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 serde-aux = "2.1.1"
-serde_json = "1.0"
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 serde-tuple-vec-map = "1.0"
 smallstr = { version = "0.2", features = ["serde"] }
 smallvec = "1.6"
-tinystr = { version = "0.4.5", features = ["serde"] }
+tinystr = { version = "0.4.10", features = ["alloc", "serde"], default-features = false }
 displaydoc = { version = "0.2.3", default-features = false }
 
 # Dependencies for the download feature

@@ -27,7 +27,7 @@ include = [
 all-features = true
 
 [dependencies]
-serde = {version = "1", optional = true}
+serde = {version = "1", optional = true, default-features = false, features = ["alloc"]}
 
 [dev-dependencies]
 serde = "1"

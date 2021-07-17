@@ -35,13 +35,13 @@ all-features = true
 [dependencies]
 icu_provider = { version = "0.2", path = "../../provider/core", features = ["provider_serde"] }
 icu_locid = { version = "0.2", path = "../../components/locid", features = ["serde"] }
-serde = { version = "1.0", features = ["derive"] }
-erased-serde = { version = "0.3" }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
+erased-serde = { version = "0.3", default-features = false, features = ["alloc"] }
 displaydoc = { version = "0.2.3", default-features = false }
 
 # Serializers
 # Note: serde_json is always included because it is used for parsing manifest.json
-serde_json = { version = "1.0" }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 bincode = { version = "1.3", optional = true }
 
 # Dependencies for the export module

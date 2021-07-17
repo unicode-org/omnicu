@@ -24,7 +24,7 @@ all-features = true
 
 [dependencies]
 either = "1.6.1"
-serde = { version = "1.0", optional = true }
+serde = { version = "1.0", optional = true , default-features = false, features = ["alloc"] }
 yoke = { path = "../yoke", version = "0.2.0", optional = true }
 
 [dev-dependencies]

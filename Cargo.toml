@@ -3,7 +3,7 @@
 # (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).
 
 [workspace]
-
+resolver = "2"
 members = [
     "components/datetime",
     "components/decimal",

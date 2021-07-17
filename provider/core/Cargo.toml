@@ -34,15 +34,15 @@ macros = ["icu_provider_macros"]
 
 [dependencies]
 icu_locid = { version = "0.2", path = "../../components/locid" }
-tinystr = "0.4.5"
+tinystr = { version = "0.4.10", features = ["alloc"], default-features = false }
 writeable = { version = "0.2", path = "../../utils/writeable" }
 displaydoc = { version = "0.2.3", default-features = false }
 yoke = { version = "0.2", path = "../../utils/yoke", features = ["serde", "derive"] }
 icu_provider_macros = { version = "0.2", path = "../macros", optional = true }
 
 # For "provider_serde" feature
-erased-serde = { version = "0.3", optional = true }
-serde = { version = "1.0", features = ["derive"], optional = true }
+erased-serde = { version = "0.3", optional = true, default-features = false, features = ["alloc"] }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"], optional = true }
 
 [dev-dependencies]
 serde_json = "1.0"

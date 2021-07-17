@@ -29,5 +29,5 @@ icu_locid = { version = "0.2", path = "../../components/locid" }
 icu_provider = { version = "0.2", path = "../../provider/core", features = ["provider_serde"] }
 icu_locid_macros = { version = "0.2", path = "../../components/locid/macros" }
 icu_uniset = { version = "0.2", path = "../../components/uniset" }
-tinystr = "0.4"
+tinystr = { version = "0.4.10", features = ["alloc"], default-features = false }
 displaydoc = { version = "0.2.3", default-features = false }

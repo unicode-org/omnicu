@@ -33,7 +33,7 @@ icu_provider = { version = "0.2", path = "../../provider/core" }
 
 [dev-dependencies]
 criterion = "0.3"
-serde = { version = "1.0", features = ["derive"] }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"] }
 serde_json = {version = "1.0" }
 icu_locid = { version = "0.2", path = "../../components/locid" }
 icu_provider = { version = "0.2", path = "../../provider/core" }

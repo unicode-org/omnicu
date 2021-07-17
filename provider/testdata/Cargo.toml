@@ -132,8 +132,8 @@ icu_locid = { version = "0.2", path = "../../components/locid" }
 
 # Dependencies for the "metadata" feature
 cargo_metadata = { version = "0.13", optional = true }
-serde = { version = "1.0", features = ["derive"], optional = true }
-serde_json = { version = "1.0", optional = true }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"], optional = true }
+serde_json = { version = "1.0", optional = true, default-features = false, features = ["alloc"] }
 displaydoc = { version = "0.2.3", default-features = false, optional = true }
 writeable = { version = "0.2", path = "../../utils/writeable", optional = true }
 

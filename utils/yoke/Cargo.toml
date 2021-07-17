@@ -22,13 +22,15 @@ include = [
 
 [features]
 derive = ["yoke-derive"]
+alloc = ["stable_deref_trait/alloc", "serde/alloc"]
+default = ["alloc"]
 
 [package.metadata.docs.rs]
 all-features = true
 
 [dependencies]
-stable_deref_trait = "1.2.0"
-serde = { version = "1.0", optional = true }
+stable_deref_trait = { version = "1.2.0", features = ["alloc"], default-features = false }
+serde = { version = "1.0", optional = true, default-features = false }
 yoke-derive = { path = "./derive", version = "0.1.0", optional = true}
 
 [dev-dependencies]

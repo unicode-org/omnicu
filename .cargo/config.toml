@@ -13,6 +13,8 @@ tidy = "make tidy"
 # field-reassign-with-default: https://github.com/rust-lang/rust-clippy/issues/6559 (fixed in nightly but not stable)
 clippy-all = "clippy --all-features --all-targets -- -D warnings -Aclippy::field-reassign-with-default"
 
+check-thumb = "check --target thumbv7m-none-eabi"
+build-thumb = "build --target thumbv7m-none-eabi"
 ### WASM TASKS ###
 
 # Re-build standard library with panic=abort.

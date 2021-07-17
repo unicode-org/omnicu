@@ -2,6 +2,8 @@
 // called LICENSE at the top level of the ICU4X source tree
 // (online at: https://github.com/unicode-org/icu4x/blob/main/LICENSE ).
 
+#![cfg_attr(not(test), no_std)]
+
 //! `writeable` is a utility crate of the [`ICU4X`] project.
 //!
 //! It includes [`Writeable`], a core trait representing an object that can be written to a
@@ -49,9 +51,12 @@
 //!
 //! [`ICU4X`]: ../icu/index.html
 
+extern crate alloc;
+
 mod ops;
 
-use std::fmt;
+use alloc::string::String;
+use core::fmt;
 
 /// A hint to help consumers of Writeable pre-allocate bytes before they call write_to.
 ///

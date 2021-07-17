@@ -4,7 +4,7 @@
 
 use crate::LengthHint;
 
-impl std::ops::Add<LengthHint> for LengthHint {
+impl core::ops::Add<LengthHint> for LengthHint {
     type Output = Self;
 
     fn add(self, other: LengthHint) -> Self {
@@ -18,22 +18,22 @@ impl std::ops::Add<LengthHint> for LengthHint {
     }
 }
 
-impl std::ops::AddAssign<LengthHint> for LengthHint {
+impl core::ops::AddAssign<LengthHint> for LengthHint {
     fn add_assign(&mut self, other: Self) {
         *self = *self + other;
     }
 }
 
-impl std::iter::Sum<LengthHint> for LengthHint {
+impl core::iter::Sum<LengthHint> for LengthHint {
     fn sum<I>(iter: I) -> Self
     where
         I: Iterator<Item = LengthHint>,
     {
-        iter.fold(LengthHint::Exact(0), std::ops::Add::add)
+        iter.fold(LengthHint::Exact(0), core::ops::Add::add)
     }
 }
 
-impl std::ops::Add<usize> for LengthHint {
+impl core::ops::Add<usize> for LengthHint {
     type Output = Self;
 
     fn add(self, other: usize) -> Self {
@@ -44,13 +44,13 @@ impl std::ops::Add<usize> for LengthHint {
     }
 }
 
-impl std::ops::AddAssign<usize> for LengthHint {
+impl core::ops::AddAssign<usize> for LengthHint {
     fn add_assign(&mut self, other: usize) {
         *self = *self + other;
     }
 }
 
-impl std::iter::Sum<usize> for LengthHint {
+impl core::iter::Sum<usize> for LengthHint {
     fn sum<I>(iter: I) -> Self
     where
         I: Iterator<Item = usize>,

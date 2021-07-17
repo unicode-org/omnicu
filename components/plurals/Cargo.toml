@@ -32,7 +32,7 @@ all-features = true
 fixed_decimal = { version = "0.2", path = "../../utils/fixed_decimal" }
 icu_provider = { version = "0.2", path = "../../provider/core", features = ["macros"] }
 icu_locid = { version = "0.2", path = "../locid" }
-serde = { version = "1.0", features = ["derive"], optional = true }
+serde = { version = "1.0", default-features = false, features = ["derive", "alloc"], optional = true }
 displaydoc = { version = "0.2.3", default-features = false }
 
 [dev-dependencies]

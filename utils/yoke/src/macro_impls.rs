@@ -7,7 +7,7 @@
 #![allow(clippy::transmute_ptr_to_ptr)]
 
 use crate::{Yokeable, ZeroCopyFrom};
-use std::{mem, ptr};
+use core::{mem, ptr};
 
 macro_rules! copy_yoke_impl {
     () => {
