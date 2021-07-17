@@ -310,9 +310,7 @@ fn test_components_exact_matches() {
 }
 
 /// Tests that component::Bags can adjust for width differences in the final pattern.
-/// TODO(584) - This is unimplemented and will panic.
 #[test]
-#[should_panic]
 fn test_components_width_differences() {
     // components/datetime/tests/fixtures/tests/components-exact-matches.json
     test_fixture("components-width-differences");
