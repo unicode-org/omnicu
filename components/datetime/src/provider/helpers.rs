@@ -71,6 +71,7 @@ impl DateTimePatterns for provider::gregory::DatePatternsV1 {
                 &self.datetime.skeletons,
                 &self.datetime.length_patterns,
                 &requested_fields,
+                &components.preferences,
             ) {
                 skeleton::BestSkeleton::AllFieldsMatch(pattern)
                 | skeleton::BestSkeleton::MissingOrExtraFields(pattern) => Some(pattern),

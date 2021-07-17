@@ -99,6 +99,10 @@ impl Pattern {
         &self.items
     }
 
+    pub fn items_mut(&mut self) -> &mut [PatternItem] {
+        &mut self.items
+    }
+
     pub fn from_bytes(input: &str) -> Result<Self, Error> {
         Parser::new(input).parse().map(Self::from)
     }
