@@ -162,7 +162,7 @@ fn is_break_utf32_by_loose(
 
 #[inline]
 fn is_break_from_table(rule_table: &[i8], property_count: usize, left: u8, right: u8) -> bool {
-    let rule = rule_table[((left as usize) - 1) * property_count + (right as usize) - 1];
+    let rule = get_break_state_from_table(rule_table, property_count, left, right);
     if rule == KEEP_RULE {
         return false;
     }
@@ -171,6 +171,11 @@ fn is_break_from_table(rule_table: &[i8], property_count: usize, left: u8, right
         return false;
     }
     true
+}
+
+#[inline]
+fn is_break(left: u8, right: u8) -> bool {
+    is_break_from_table(&UAX14_RULE_TABLE, PROP_COUNT, left, right)
 }
 
 #[inline]
@@ -371,7 +376,7 @@ macro_rules! break_iterator_impl {
                         return Some(self.current_pos_data.unwrap().0);
                     }
 
-                    if is_break_from_table(&UAX14_RULE_TABLE, PROP_COUNT, left_prop, right_prop) {
+                    if is_break(left_prop, right_prop) {
                         return Some(self.current_pos_data.unwrap().0);
                     }
                 }
@@ -704,8 +709,7 @@ impl<'a> LineBreakIteratorUtf16<'a> {
 mod tests {
     use crate::lb_define::*;
     use crate::line_breaker::get_linebreak_property_with_rule;
-    use crate::line_breaker::is_break_from_table;
-    use crate::rule_table::*;
+    use crate::line_breaker::is_break;
     use crate::LineBreakRule;
     use crate::WordBreakRule;
 
@@ -729,10 +733,6 @@ mod tests {
         assert_eq!(get_linebreak_property('\u{50005}'), XX);
         assert_eq!(get_linebreak_property('\u{17D6}'), NS);
         assert_eq!(get_linebreak_property('\u{2014}'), B2);
-    }
-
-    fn is_break(left: u8, right: u8) -> bool {
-        is_break_from_table(&UAX14_RULE_TABLE, PROP_COUNT, left, right)
     }
 
     #[test]
