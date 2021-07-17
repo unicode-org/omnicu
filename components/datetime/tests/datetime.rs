@@ -69,26 +69,29 @@ fn test_fixture(fixture_name: &str) {
         let value: MockDateTime = fx.input.value.parse().unwrap();
 
         let result = dtf.format_to_string(&value);
-        match fx.description {
-            Some(description) => assert_eq!(
-                result, fx.output.value,
-                "expected {:?} to equal {:?} – {}",
-                result, fx.output.value, description
-            ),
-            None => assert_eq!(result, fx.output.value),
-        }
+        let description = match fx.description {
+            Some(description) => {
+                format!(
+                    "\n  test: {:?}\n  file: {}.json\n",
+                    description, fixture_name
+                )
+            }
+            None => format!("\n  file: {}.json\n", fixture_name),
+        };
+
+        assert_eq!(result, fx.output.value, "{}", description);
 
         let mut s = String::new();
         dtf.format_to_write(&mut s, &value).unwrap();
-        assert_eq!(s, fx.output.value, "\n file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
 
         let fdt = dtf.format(&value);
         let s = fdt.to_string();
-        assert_eq!(s, fx.output.value, "\n file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
 
         let mut s = String::new();
         write!(s, "{}", fdt).unwrap();
-        assert_eq!(s, fx.output.value, "\n file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
     }
 }
 
@@ -110,19 +113,29 @@ fn test_fixture_with_time_zones(fixture_name: &str, config: TimeZoneConfig) {
         value.time_zone.time_variant = config.time_variant;
 
         let result = dtf.format_to_string(&value);
-        assert_eq!(result, fx.output.value, "\n  file: {}.json\n", fixture_name);
+        let description = match fx.description {
+            Some(description) => {
+                format!(
+                    "\n  test: {:?}\n  file: {}.json\n",
+                    description, fixture_name
+                )
+            }
+            None => format!("\n  file: {}.json\n", fixture_name),
+        };
+
+        assert_eq!(result, fx.output.value, "{}", description);
 
         let mut s = String::new();
         dtf.format_to_write(&mut s, &value).unwrap();
-        assert_eq!(s, fx.output.value, "\n  file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
 
         let fdt = dtf.format(&value);
         let s = fdt.to_string();
-        assert_eq!(s, fx.output.value, "\n  file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
 
         let mut s = String::new();
         write!(s, "{}", fdt).unwrap();
-        assert_eq!(s, fx.output.value, "\n  file: {}.json\n", fixture_name);
+        assert_eq!(s, fx.output.value, "{}", description);
     }
 }
 
@@ -309,10 +322,15 @@ fn test_components_exact_matches() {
     test_fixture("components-exact-matches");
 }
 
-/// Tests that component::Bags can adjust for width differences in the final pattern.
-/// TODO(584) - This is unimplemented and will panic.
+/// Tests that time zones are included, which rely on the append items mechanism.
 #[test]
-#[should_panic]
+fn test_components_with_zones() {
+    // components/datetime/tests/fixtures/tests/components_with_zones.json
+    test_fixture_with_time_zones("components_with_zones", TimeZoneConfig::default());
+}
+
+/// Tests that component::Bags can adjust for width differences in the final pattern.
+#[test]
 fn test_components_width_differences() {
     // components/datetime/tests/fixtures/tests/components-exact-matches.json
     test_fixture("components-width-differences");

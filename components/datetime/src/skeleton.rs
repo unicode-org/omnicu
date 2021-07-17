@@ -11,7 +11,7 @@ use std::convert::TryFrom;
 use crate::{
     fields::{self, Field, FieldLength, FieldSymbol},
     options::length,
-    pattern::Pattern,
+    pattern::{Pattern, PatternItem},
     provider::gregory::patterns::{LengthPatternsV1, PatternV1, SkeletonV1, SkeletonsV1},
 };
 
@@ -362,20 +362,10 @@ pub fn create_best_pattern_for_fields<'a>(
 
     // Try to match a skeleton to all of the fields.
     if let BestSkeleton::AllFieldsMatch(pattern) = first_pattern_match {
-        return BestSkeleton::AllFieldsMatch(pattern.clone());
+        return BestSkeleton::AllFieldsMatch(pattern);
     }
 
-    let FieldsByType { date, time, other } = group_fields_by_type(fields);
-
-    if !other.is_empty() {
-        // These require "append items" support, see #586.
-        // TODO(#583) - TimeZones
-        // TODO(#486) - Eras,
-        // ... etc.
-        unimplemented!(
-            "There are no \"other\" fields supported, these need to be appended to the pattern. {:?}", other
-        );
-    }
+    let FieldsByType { date, time } = group_fields_by_type(fields);
 
     if date.is_empty() || time.is_empty() {
         return match first_pattern_match {
@@ -383,7 +373,7 @@ pub fn create_best_pattern_for_fields<'a>(
                 unreachable!("Logic error in implementation. AllFieldsMatch handled above.")
             }
             BestSkeleton::MissingOrExtraFields(pattern) => {
-                BestSkeleton::MissingOrExtraFields(pattern.clone())
+                BestSkeleton::MissingOrExtraFields(pattern)
             }
             BestSkeleton::NoMatch => BestSkeleton::NoMatch,
         };
@@ -445,13 +435,10 @@ pub fn create_best_pattern_for_fields<'a>(
                 length::Date::Short => &length_patterns.short,
             };
 
-            Some(
-                Pattern::from_bytes_combination(bytes, date_pattern.clone(), time_pattern.clone())
-                    .expect("TODO"),
-            )
+            Some(Pattern::from_bytes_combination(bytes, date_pattern, time_pattern).expect("TODO"))
         }
-        (None, Some(pattern)) => Some(pattern.clone()),
-        (Some(pattern), None) => Some(pattern.clone()),
+        (None, Some(pattern)) => Some(pattern),
+        (Some(pattern), None) => Some(pattern),
         (None, None) => None,
     };
 
@@ -470,13 +457,11 @@ pub fn create_best_pattern_for_fields<'a>(
 struct FieldsByType {
     pub date: Vec<Field>,
     pub time: Vec<Field>,
-    pub other: Vec<Field>,
 }
 
 fn group_fields_by_type(fields: &[Field]) -> FieldsByType {
     let mut date = Vec::new();
     let mut time = Vec::new();
-    let mut other = Vec::new();
 
     for field in fields {
         match field.symbol {
@@ -494,17 +479,16 @@ fn group_fields_by_type(fields: &[Field]) -> FieldsByType {
             FieldSymbol::DayPeriod(_)
             | FieldSymbol::Hour(_)
             | FieldSymbol::Minute
-            | FieldSymbol::Second(_) => time.push(*field),
-
+            | FieldSymbol::Second(_)
+            | FieldSymbol::TimeZone(_) => time.push(*field),
             // Other components
-            FieldSymbol::TimeZone(_) => other.push(*field),
             // TODO(#486)
             // FieldSymbol::Era(_) => other.push(*field),
             // Plus others...
         };
     }
 
-    FieldsByType { date, time, other }
+    FieldsByType { date, time }
 }
 
 /// A partial implementation of the [UTS 35 skeleton matching algorithm](https://unicode.org/reports/tr35/tr35-dates.html#Matching_Skeletons).
@@ -513,22 +497,20 @@ fn group_fields_by_type(fields: &[Field]) -> FieldsByType {
 ///
 ///  * Compute a score based on the best possible match for the given fields.
 ///  * Select the skeleton with highest score.
-///
-/// The following is not implemented:
-///
-///  * 2.6.2.1 Matching Skeletons
-///    - TODO(#584) - Modify the resulting pattern to have fields of the same length. For example requesting
+///  * Modify the resulting pattern to have fields of the same length. For example requesting
 ///      a skeleton "yMMMMd" can have a best match of ["yMMMd", "d MMM y"]. This pattern should
 ///      then be modified to use the requested length to produce a pattern "d MMMM y".
 ///      However, fields should not be changed from numeric to text.
+///
+/// The following is not implemented:
+///
 ///  * 2.6.2.2 Missing Skeleton Fields
-///    - TODO(#585) - The mechanism to combine a date pattern and a time pattern.
 ///    - TODO(#586) - Using the CLDR appendItems field. Note: There is not agreement yet on how
 ///      much of this step to implement. See the issue for more information.
-pub fn get_best_available_format_pattern<'a>(
-    skeletons: &'a SkeletonsV1,
+pub fn get_best_available_format_pattern(
+    skeletons: &SkeletonsV1,
     fields: &[Field],
-) -> BestSkeleton<&'a Pattern> {
+) -> BestSkeleton<Pattern> {
     let mut closest_format_pattern = None;
     let mut closest_distance: u32 = u32::MAX;
     let mut closest_missing_fields = 0;
@@ -618,10 +600,40 @@ pub fn get_best_available_format_pattern<'a>(
     if closest_missing_fields == fields.len() {
         return BestSkeleton::NoMatch;
     }
-    if closest_distance >= SKELETON_EXTRA_SYMBOL {
-        return BestSkeleton::MissingOrExtraFields(closest_format_pattern);
+
+    if closest_distance == NO_DISTANCE {
+        return BestSkeleton::AllFieldsMatch(closest_format_pattern.clone());
     }
-    BestSkeleton::AllFieldsMatch(closest_format_pattern)
+
+    // Modify the resulting pattern to have fields of the same length.
+    let expanded_pattern = Pattern::from(
+        closest_format_pattern
+            .items()
+            .iter()
+            .map(|item| {
+                if let PatternItem::Field(pattern_field) = item {
+                    if let Some(requested_field) = fields
+                        .iter()
+                        .find(|field| field.symbol == pattern_field.symbol)
+                    {
+                        if requested_field.length != pattern_field.length
+                            && requested_field.get_length_type() == pattern_field.get_length_type()
+                        {
+                            return PatternItem::Field(*requested_field);
+                        }
+                    }
+                }
+                // There's no match, or this is a string literal return the original item.
+                item.clone()
+            })
+            .collect::<Vec<PatternItem>>(),
+    );
+
+    if closest_distance >= SKELETON_EXTRA_SYMBOL {
+        return BestSkeleton::MissingOrExtraFields(expanded_pattern);
+    }
+
+    BestSkeleton::AllFieldsMatch(expanded_pattern)
 }
 
 pub fn get_available_format_patterns<'a>(
@@ -687,7 +699,7 @@ mod test {
             | BestSkeleton::MissingOrExtraFields(available_format_pattern) => {
                 assert_eq!(
                     available_format_pattern.to_string(),
-                    String::from("MMM d, y")
+                    String::from("MMMM d, y")
                 )
             }
             BestSkeleton::NoMatch => {
@@ -719,6 +731,7 @@ mod test {
 
     // TODO(#586) - Append items support needs to be added.
     #[test]
+    #[should_panic]
     fn test_missing_append_items_support() {
         let components = components::Bag {
             year: Some(components::Numeric::Numeric),
@@ -737,11 +750,10 @@ mod test {
             &requested_fields,
         ) {
             BestSkeleton::AllFieldsMatch(available_format_pattern) => {
-                // TODO - This needs to support the "Z" pattern. This test will begin to fail
-                // once support is added.
+                // TODO - Append items are needed here.
                 assert_eq!(
                     available_format_pattern.to_string(),
-                    String::from("MMM d, y")
+                    String::from("MMMM d, y vvvv")
                 )
             }
             best => panic!("Unexpected {:?}", best),

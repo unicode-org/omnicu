@@ -1,23 +1,48 @@
 [
     {
+        "description": "Full date time example with long time zone",
         "input": {
             "locale": "en",
-            "value": "2020-01-21T08:25:07.000",
+            "value": "2020-01-21T08:25:07.000+05:00",
             "options": {
                 "components": {
                     "weekday": "long",
                     "month": "long",
-                    "day": "two-digit",
+                    "day": "numeric",
                     "year": "numeric",
-                    "hour": "numeric",
-                    "minute": "numeric",
-                    "second": "numeric",
-                    "time_zone_name": "long"
+                    "hour": "two-digit",
+                    "minute": "two-digit",
+                    "second": "two-digit",
+                    "time_zone_name": "long",
+                    "preferences": { "hour_cycle": "h23" }
                 }
             }
         },
         "output": {
-            "value": "Tuesday, January 21, 2020 at 8:25:07 AM"
+            "value": "Tuesday, January 21, 2020 at 08:25:07 GMT+05:00"
+        }
+    },
+    {
+        "description": "Full date time example with short time zone",
+        "input": {
+            "locale": "en",
+            "value": "2020-01-21T08:25:07.000+05:00",
+            "options": {
+                "components": {
+                    "weekday": "long",
+                    "month": "long",
+                    "day": "numeric",
+                    "year": "numeric",
+                    "hour": "two-digit",
+                    "minute": "two-digit",
+                    "second": "two-digit",
+                    "time_zone_name": "short",
+                    "preferences": { "hour_cycle": "h23" }
+                }
+            }
+        },
+        "output": {
+            "value": "Tuesday, January 21, 2020 at 08:25:07 GMT+05:00"
         }
     }
 ]

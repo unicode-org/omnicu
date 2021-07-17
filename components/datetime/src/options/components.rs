@@ -9,8 +9,8 @@
 //! | Algorithm step | Status |
 //! |----------------|--------|
 //! | Match skeleton fields according to a ranking             | Implemented |
-//! | Adjust the matched pattern to have certain widths        | Not yet implemented. See [issue #584](https://github.com/unicode-org/icu4x/issues/584) |
-//! | Match date and times separately, and them combine them   | Not yet implemented. See [issue #585](https://github.com/unicode-org/icu4x/issues/585) |
+//! | Adjust the matched pattern to have certain widths        | Implemented |
+//! | Match date and times separately, and them combine them   | Implemented |
 //! | Use appendItems to fill in a pattern with missing fields | Not yet, and may not be fully implemented. See [issue #586](https://github.com/unicode-org/icu4x/issues/586) |
 //!
 //! # Description
@@ -225,7 +225,7 @@ impl Bag {
                     // region-based (h12 for US, h23 for GB, etc). This is in CLDR, but we need
                     // to load it as well as think about the best architecture for where that
                     // data loading code should reside.
-                    _ => fields::Hour::H24,
+                    _ => fields::Hour::H23,
                 }),
                 length: match hour {
                     // Example for h: (note that this is the same for k, K, and H)
@@ -263,10 +263,107 @@ impl Bag {
             // A - Milliseconds in day. Not used in skeletons.
         }
 
-        // TODO(#583) - Implement:
-        // if self.time_zone_name.is_some() {
-        //     unimplemented!();
-        // }
+        if let Some(time_zone_name) = self.time_zone_name {
+            fields.push(match time_zone_name {
+                // TODO Reviewer: What is correct here? The CLDR seems to only have v and vvvv in
+                // the patterns. It's ambiguous to me what this proper behavior should be. Also, it
+                // seems like the ICU4X component bag API should have more features than the
+                // ECMA 402 one, which seems quite limited. It's also not clear to me how this
+                // leaves certain options up to the localizers.
+                //
+                // At the bottom of this comment I have a list of all of the time zone skeletons
+                // and patterns in availableFormats. I'm not seeing in the UTS 35 skeleton matching
+                // algorithm much information about expanding timezones _within_ a pattern. It's
+                // odd to me that there is no way to select more specific time zone names here.
+                //
+                // I get the sense there is more complexity around falling back for time zone names
+                // and I'm not sure what's correct here.
+                //
+                // {
+                //   validTimeZoneSkeletons: Map(9) {
+                //     // skeleton => usage count
+                //     'hmsv' => 373,
+                //     'Hmsv' => 373,
+                //     'hmv' => 373,
+                //     'Hmv' => 373,
+                //     'hmsvvvv' => 33,
+                //     'Hmsvvvv' => 33,
+                //     'hmvvvv' => 5,
+                //     'Hmvvvv' => 5,
+                //     'HHmmZ' => 2
+                //   },
+                //   validTimeZonePatterns: Set(59) {
+                //     'h:mm:ss a v',
+                //     'HH:mm:ss v',
+                //     'h:mm a v',
+                //     'HH:mm v',
+                //     'a h:mm:ss v',
+                //     'a h:mm v',
+                //     "h:mm:ss 'ч'. a v",
+                //     "HH:mm:ss 'ч'. v",
+                //     "h:mm 'ч'. a v",
+                //     "HH:mm 'ч'. v",
+                //     'h:mm:ss a (v)',
+                //     'HH:mm:ss (v)',
+                //     'h:mm a (v)',
+                //     'HH:mm (v)',
+                //     'H:mm:ss v',
+                //     'h:mm:ss a (vvvv)',
+                //     'H:mm:ss (vvvv)',
+                //     'H:mm v',
+                //     'h:mm a (vvvv)',
+                //     'H:mm (vvvv)',
+                //     'h.mm.ss a v',
+                //     'HH.mm.ss v',
+                //     'h.mm a v',
+                //     'HH.mm v',
+                //     'H.mm.ss v',
+                //     'H.mm v',
+                //     'HH:mm:ss (vvvv)',
+                //     'HH:mm (Z)',
+                //     "h 'h' mm 'min' ss 's' a v",
+                //     "HH 'h' mm 'min' ss 's' v",
+                //     "h 'h' mm a v",
+                //     "HH 'h' mm v",
+                //     'h:mm:ss v',
+                //     'h:mm v',
+                //     'h.mm.ss. a v',
+                //     'v – HH:mm:ss',
+                //     'v – HH:mm',
+                //     'aK:mm:ss v',
+                //     'aK:mm v',
+                //     'H시 m분 s초 v',
+                //     'hh:mm:ss a; v',
+                //     'HH:mm:ss; v',
+                //     'hh:mm a; v',
+                //     'HH:mm; v',
+                //     'v a h:mm:ss',
+                //     'v HH:mm:ss',
+                //     'v a h:mm',
+                //     'v HH:mm',
+                //     'h:mm:ss a, v',
+                //     'HH:mm:ss, v',
+                //     'h:mm a, v',
+                //     'HH:mm, v',
+                //     'h:mm น. a v',
+                //     'ah:mm:ss [v]',
+                //     'HH:mm:ss [v]',
+                //     'ah:mm [v]',
+                //     'HH:mm [v]',
+                //     'v ah:mm:ss',
+                //     'v ah:mm'
+                //   }
+                // }
+                TimeZoneName::Short => Field {
+                    symbol: FieldSymbol::TimeZone(fields::TimeZone::LowerV),
+                    length: FieldLength::One,
+                },
+                TimeZoneName::Long => Field {
+                    symbol: FieldSymbol::TimeZone(fields::TimeZone::LowerV),
+                    length: FieldLength::Wide,
+                },
+            });
+        }
 
         debug_assert!(
             fields.windows(2).all(|f| f[0] < f[1]),
@@ -368,7 +465,7 @@ mod test {
                 (Symbol::Year(fields::Year::Calendar), Length::One).into(),
                 (Symbol::Month(fields::Month::Format), Length::Wide).into(),
                 (Symbol::Day(fields::Day::DayOfMonth), Length::One).into(),
-                (Symbol::Hour(fields::Hour::H24), Length::One).into(),
+                (Symbol::Hour(fields::Hour::H23), Length::One).into(),
                 (Symbol::Minute, Length::One).into(),
                 (Symbol::Second(fields::Second::Second), Length::One).into(),
             ]
