@@ -103,9 +103,9 @@ impl UnicodeSetBuilder {
     /// ```
     /// use icu::uniset::UnicodeSetBuilder;
     /// let mut builder = UnicodeSetBuilder::new();
-    /// builder.add_u32(65);
+    /// builder.add_u32(0x41);
     /// let check = builder.build();
-    /// assert_eq!(check.contains_u32(65), true);
+    /// assert_eq!(check.contains_u32(0x41), true);
     /// ```
     pub fn add_u32(&mut self, c: u32) {
         if c <= char::MAX as u32 {
@@ -137,7 +137,7 @@ impl UnicodeSetBuilder {
     /// ```
     /// use icu::uniset::{UnicodeSet, UnicodeSetBuilder};
     /// let mut builder = UnicodeSetBuilder::new();
-    /// let set = UnicodeSet::from_inversion_list(vec![65, 76]).unwrap();
+    /// let set = UnicodeSet::from_inversion_list(vec![0x41, 0x4C]).unwrap();
     /// builder.add_set(&set);
     /// let check = builder.build();
     /// assert_eq!(check.iter_chars().next(), Some('A'));
@@ -204,7 +204,7 @@ impl UnicodeSetBuilder {
     /// ```
     /// use icu::uniset::{UnicodeSet, UnicodeSetBuilder};
     /// let mut builder = UnicodeSetBuilder::new();
-    /// let set = UnicodeSet::from_inversion_list(vec![65, 70]).unwrap();
+    /// let set = UnicodeSet::from_inversion_list(vec![0x41, 0x46]).unwrap();
     /// builder.add_range(&('A'..='Z'));
     /// builder.remove_set(&set); // removes 'A'..='E'
     /// let check = builder.build();
@@ -325,7 +325,7 @@ impl UnicodeSetBuilder {
     /// ```
     /// use icu::uniset::{UnicodeSetBuilder, UnicodeSet};
     /// let mut builder = UnicodeSetBuilder::new();
-    /// let set = UnicodeSet::from_inversion_list(vec![0, 65, 70, (std::char::MAX as u32) + 1]).unwrap();
+    /// let set = UnicodeSet::from_inversion_list(vec![0x0, 0x41, 0x46, (std::char::MAX as u32) + 1]).unwrap();
     /// builder.add_set(&set);
     /// builder.complement();
     /// let check = builder.build();
@@ -394,7 +394,7 @@ impl UnicodeSetBuilder {
     /// ```
     /// use icu::uniset::{UnicodeSetBuilder, UnicodeSet};
     /// let mut builder = UnicodeSetBuilder::new();
-    /// let set = UnicodeSet::from_inversion_list(vec![65, 70, 75, 90]).unwrap();
+    /// let set = UnicodeSet::from_inversion_list(vec![0x41, 0x46, 0x4B, 0x5A]).unwrap();
     /// builder.add_range(&('C'..='N')); // 67 - 78
     /// builder.complement_set(&set);
     /// let check = builder.build();
@@ -441,7 +441,7 @@ mod tests {
     #[test]
     fn test_build() {
         let mut builder = UnicodeSetBuilder::new();
-        builder.add(65, 66);
+        builder.add(0x41, 0x42);
         let check: UnicodeSet = builder.build();
         assert_eq!(check.iter_chars().next(), Some('A'));
     }
@@ -456,169 +456,169 @@ mod tests {
     #[test]
     fn test_add_to_empty() {
         let mut builder = UnicodeSetBuilder::new();
-        builder.add(0, 10);
-        assert_eq!(builder.intervals, vec![0, 10]);
+        builder.add(0x0, 0xA);
+        assert_eq!(builder.intervals, vec![0x0, 0xA]);
     }
 
     #[test]
     fn test_add_invalid() {
         let mut builder = UnicodeSetBuilder::new();
-        builder.add(0, 0);
-        builder.add(5, 0);
+        builder.add(0x0, 0x0);
+        builder.add(0x5, 0x0);
         assert!(builder.intervals.is_empty());
     }
 
     #[test]
     fn test_add_to_start() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(0, 5);
-        let expected = vec![0, 5, 10, 20, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x0, 0x5);
+        let expected = vec![0x0, 0x5, 0xA, 0x14, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_start_overlap() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(0, 15);
-        let expected = vec![0, 20, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x0, 0xE);
+        let expected = vec![0x0, 0x14, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_end() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(60, 70);
-        let expected = vec![10, 20, 40, 50, 60, 70];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x3C, 0x46);
+        let expected = vec![0xA, 0x14, 0x28, 0x32, 60, 70];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_end_overlap() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(45, 70);
-        let expected = vec![10, 20, 40, 70];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x2B, 0x46);
+        let expected = vec![0xA, 0x14, 0x28, 0x46];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_middle_no_overlap() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(25, 27);
-        let expected = vec![10, 20, 25, 27, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x19, 0x1B);
+        let expected = vec![0xA, 0x14, 0x19, 0x1B, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_middle_inside() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(10, 20);
-        let expected = vec![10, 20, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0xA, 0x14);
+        let expected = vec![0xA, 0x14, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_middle_left_overlap() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(15, 25);
-        let expected = vec![10, 25, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0xF, 0x19);
+        let expected = vec![0xA, 0x19, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_middle_right_overlap() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(30, 40);
-        let expected = vec![10, 20, 30, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x1E, 0x28);
+        let expected = vec![0xA, 0x14, 0x1E, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_full_encompass() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(0, 60);
-        let expected = vec![0, 60];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x0, 0x3C);
+        let expected = vec![0x0, 0x3C];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_to_partial_encompass() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(0, 35);
-        let expected = vec![0, 35, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x0, 0x23);
+        let expected = vec![0x0, 0x23, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_aligned_front() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
         builder.add(5, 10);
-        let expected = vec![5, 20, 40, 50];
+        let expected = vec![5, 0x14, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_aligned_back() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(50, 55);
-        let expected = vec![10, 20, 40, 55];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x32, 0x37);
+        let expected = vec![0xA, 0x14, 0x28, 0x37];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_aligned_start_middle() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(20, 25);
-        let expected = vec![10, 25, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x14, 0x19);
+        let expected = vec![0xA, 0x19, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_aligned_end_middle() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(35, 40);
-        let expected = vec![10, 20, 35, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x23, 0x28);
+        let expected = vec![0xA, 0x14, 0x23, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_aligned_in_between_end() {
-        let mut builder = generate_tester(vec![10, 20, 30, 40, 50, 60]);
-        builder.add(15, 30);
-        let expected = vec![10, 40, 50, 60];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x1E, 0x28, 0x32, 0x3C]);
+        builder.add(0xF, 0x1E);
+        let expected = vec![0xA, 0x28, 0x32, 0x3C];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_aligned_in_between_start() {
-        let mut builder = generate_tester(vec![10, 20, 30, 40, 50, 60]);
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x1E, 0x28, 0x32, 0x3C]);
         builder.add(20, 35);
-        let expected = vec![10, 40, 50, 60];
+        let expected = vec![0xA, 0x28, 0x32, 0x3C];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_adjacent_ranges() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.add(19, 20);
-        builder.add(20, 21);
-        builder.add(21, 22);
-        let expected = vec![10, 22, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.add(0x13, 0x14);
+        builder.add(0x14, 0x15);
+        builder.add(0x15, 0x16);
+        let expected = vec![0xA, 0x16, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_add_unicodeset() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        let check = UnicodeSet::from_inversion_list(vec![5, 10, 22, 33, 44, 51]).unwrap();
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        let check = UnicodeSet::from_inversion_list(vec![0x5, 0xA, 0x16, 0x21, 0x2C, 0x33]).unwrap();
         builder.add_set(&check);
-        let expected = vec![5, 20, 22, 33, 40, 51];
+        let expected = vec![0x5, 0x14, 0x16, 0x21, 0x28, 0x33];
         assert_eq!(builder.intervals, expected);
     }
     #[test]
     fn test_add_char() {
         let mut builder = UnicodeSetBuilder::new();
         builder.add_char('a');
-        let expected = vec![97, 98];
+        let expected = vec![0x61, 0x62];
         assert_eq!(builder.intervals, expected);
     }
 
@@ -626,7 +626,7 @@ mod tests {
     fn test_add_range() {
         let mut builder = UnicodeSetBuilder::new();
         builder.add_range(&('A'..='Z'));
-        let expected = vec![65, 91];
+        let expected = vec![0x41, 0x5B];
         assert_eq!(builder.intervals, expected);
     }
 
@@ -640,202 +640,202 @@ mod tests {
     #[test]
     fn test_remove_empty() {
         let mut builder = UnicodeSetBuilder::new();
-        builder.remove(0, 10);
+        builder.remove(0x0, 0xA);
         assert!(builder.intervals.is_empty());
     }
 
     #[test]
     fn test_remove_entire_builder() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.remove(10, 50);
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.remove(0xA, 0x32);
         assert!(builder.intervals.is_empty());
     }
 
     #[test]
     fn test_remove_entire_range() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.remove(10, 20);
-        let expected = vec![40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.remove(0xA, 0x14);
+        let expected = vec![0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_partial_range_left() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.remove(10, 45);
-        let expected = vec![45, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.remove(0xA, 0x2B);
+        let expected = vec![0x2B, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_ne_range() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.remove(20, 40);
-        let expected = vec![10, 20, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.remove(0x14, 0x28);
+        let expected = vec![0xA, 0x14, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_partial_range_right() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.remove(15, 55);
-        let expected = vec![10, 15];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.remove(0xF, 0x37);
+        let expected = vec![0xA, 0xF];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_middle_range() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.remove(12, 18);
-        let expected = vec![10, 12, 18, 20, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.remove(0xC, 0x12);
+        let expected = vec![0xA, 0xC, 0x12, 0x14, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_ne_middle_range() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.remove(25, 27);
-        let expected = vec![10, 20, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.remove(0x19, 0x1B);
+        let expected = vec![0xA, 0x14, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_encompassed_range() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50, 70, 80]);
-        builder.remove(25, 55);
-        let expected = vec![10, 20, 70, 80];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32, 70, 80]);
+        builder.remove(0x19, 0x37);
+        let expected = vec![0xA, 0x14, 0x46, 0x50];
         assert_eq!(builder.intervals, expected);
     }
     #[test]
     fn test_remove_adjacent_ranges() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.remove(39, 40);
-        builder.remove(40, 41);
-        builder.remove(41, 42);
-        let expected = vec![10, 20, 42, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.remove(0x27, 0x28);
+        builder.remove(0x28, 0x29);
+        builder.remove(0x29, 0x2A);
+        let expected = vec![0xA, 0x14, 0x2A, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_char() {
-        let mut builder = generate_tester(vec![65, 70]);
+        let mut builder = generate_tester(vec![0x41, 0x46]);
         builder.remove_char('A'); // 65
-        let expected = vec![66, 70];
+        let expected = vec![0x42, 0x46];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_range() {
-        let mut builder = generate_tester(vec![65, 90]);
+        let mut builder = generate_tester(vec![0x41, 0x5A]);
         builder.remove_range(&('A'..'L')); // 65 - 76
-        let expected = vec![76, 90];
+        let expected = vec![0x4C, 0x5A];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_remove_set() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50, 70, 80]);
-        let remove = UnicodeSet::from_inversion_list(vec![10, 20, 45, 75]).unwrap();
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32, 70, 80]);
+        let remove = UnicodeSet::from_inversion_list(vec![0xA, 0x14, 0x2D, 0x4B]).unwrap();
         builder.remove_set(&remove);
-        let expected = vec![40, 45, 75, 80];
+        let expected = vec![0x28, 0x2D, 0x4B, 0x50];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_retain_char() {
-        let mut builder = generate_tester(vec![65, 90]);
+        let mut builder = generate_tester(vec![0x41, 0x5A]);
         builder.retain_char('A'); // 65
-        let expected = vec![65, 66];
+        let expected = vec![0x41, 0x42];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_retain_range() {
-        let mut builder = generate_tester(vec![65, 90]);
+        let mut builder = generate_tester(vec![0x41, 0x5A]);
         builder.retain_range(&('C'..'F')); // 67 - 70
-        let expected = vec![67, 70];
+        let expected = vec![0x43, 0x46];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_retain_range_empty() {
-        let mut builder = generate_tester(vec![65, 70]);
+        let mut builder = generate_tester(vec![0x41, 0x46]);
         builder.retain_range(&('F'..'Z'));
         assert!(builder.intervals.is_empty());
     }
 
     #[test]
     fn test_retain_set() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50, 70, 80]);
-        let retain = UnicodeSet::from_inversion_list(vec![15, 20, 25, 55, 79, 81]).unwrap();
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32, 70, 80]);
+        let retain = UnicodeSet::from_inversion_list(vec![0xE, 0x14, 0x19, 0x37, 0x4D, 0x51]).unwrap();
         builder.retain_set(&retain);
-        let expected = vec![15, 20, 40, 50, 79, 80];
+        let expected = vec![0xE, 0x14, 0x28, 0x32, 0x4D, 0x50];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_complement() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
         builder.complement();
-        let expected = vec![0, 10, 20, 40, 50, (char::MAX as u32) + 1];
+        let expected = vec![0x0, 0xA, 0x14, 0x28, 0x32, (char::MAX as u32) + 1];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_complement_zero_max() {
-        let mut builder = generate_tester(vec![0, 10, 90, (char::MAX as u32) + 1]);
+        let mut builder = generate_tester(vec![0x0, 0xA, 0x5A, (char::MAX as u32) + 1]);
         builder.complement();
-        let expected = vec![10, 90];
+        let expected = vec![0xA, 0x5A];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_complement_interior() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.complement_list(&[15, 20]);
-        let expected = vec![10, 15, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.complement_list(&[0xE, 0x14]);
+        let expected = vec![0xA, 0xE, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_complement_exterior() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.complement_list(&[25, 35]);
-        let expected = vec![10, 20, 25, 35, 40, 50];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.complement_list(&[0x19, 0x23]);
+        let expected = vec![0xA, 0x14, 0x19, 0x23, 0x28, 0x32];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_complement_larger_list() {
-        let mut builder = generate_tester(vec![10, 20, 40, 50]);
-        builder.complement_list(&[30, 55, 60, 70]);
-        let expected = vec![10, 20, 30, 40, 50, 55, 60, 70];
+        let mut builder = generate_tester(vec![0xA, 0x14, 0x28, 0x32]);
+        builder.complement_list(&[0x1E, 0x37, 0x3C, 0x46]);
+        let expected = vec![0xA, 0x14, 0x1E, 0x28, 0x32, 0x37, 0x3C, 0x46];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_complement_char() {
-        let mut builder = generate_tester(vec![65, 76]); // A - K
+        let mut builder = generate_tester(vec![0x41, 0x4C]); // A - K
         builder.complement_char('A');
         builder.complement_char('L');
-        let expected = vec![66, 77];
+        let expected = vec![0x42, 0x4D];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_complement_range() {
-        let mut builder = generate_tester(vec![70, 76]); // F - K
+        let mut builder = generate_tester(vec![0x46, 0x4C]); // F - K
         builder.complement_range(&('A'..='Z'));
-        let expected = vec![65, 70, 76, 91];
+        let expected = vec![0x41, 0x46, 0x4C, 0x5B];
         assert_eq!(builder.intervals, expected);
     }
 
     #[test]
     fn test_complement_set() {
-        let mut builder = generate_tester(vec![67, 78]);
-        let set = UnicodeSet::from_inversion_list(vec![65, 70, 75, 90]).unwrap();
+        let mut builder = generate_tester(vec![0x43, 0x4E]);
+        let set = UnicodeSet::from_inversion_list(vec![0x41, 0x46, 0x4B, 0x5A]).unwrap();
         builder.complement_set(&set);
-        let expected = vec![65, 67, 70, 75, 78, 90];
+        let expected = vec![0x41, 0x43, 0x46, 0x4B, 0x4E, 0x5A];
         assert_eq!(builder.intervals, expected);
     }
 

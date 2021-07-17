@@ -111,7 +111,7 @@ mod tests {
     }
     #[test]
     fn test_try_from_range_to_err() {
-        let check = UnicodeSet::try_from(&(..(0 as char)));
+        let check = UnicodeSet::try_from(&(..(0x0 as char)));
         assert!(matches!(check, Err(UnicodeSetError::InvalidRange(0, 0))));
     }
     #[test]

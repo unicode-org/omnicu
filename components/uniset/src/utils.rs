@@ -35,7 +35,7 @@ mod tests {
 
     #[test]
     fn test_is_valid() {
-        let check = vec![2, 3, 4, 5];
+        let check = vec![0x2, 0x3, 0x4, 0x5];
         assert!(is_valid(&check));
     }
     #[test]
@@ -45,44 +45,44 @@ mod tests {
     }
     #[test]
     fn test_is_valid_overlapping() {
-        let check = vec![2, 5, 4, 6];
+        let check = vec![0x2, 0x5, 0x4, 0x6];
         assert!(!is_valid(&check));
     }
     #[test]
     fn test_is_valid_out_of_order() {
-        let check = vec![5, 4, 5, 6, 7];
+        let check = vec![0x5, 0x4, 0x5, 0x6, 0x7];
         assert!(!is_valid(&check));
     }
     #[test]
     fn test_is_valid_duplicate() {
-        let check = vec![1, 2, 3, 3, 5];
+        let check = vec![0x1, 0x2, 0x3, 0x3, 0x5];
         assert!(!is_valid(&check));
     }
     #[test]
     fn test_is_valid_odd() {
-        let check = vec![1, 2, 3, 4, 5];
+        let check = vec![0x1, 0x2, 0x3, 0x4, 0x5];
         assert!(!is_valid(&check));
     }
     #[test]
     fn test_is_valid_out_of_range() {
-        let check = vec![1, 2, 3, 4, (char::MAX as u32) + 1];
+        let check = vec![0x1, 0x2, 0x3, 0x4, (char::MAX as u32) + 1];
         assert!(!is_valid(&check));
     }
     // deconstruct_range
     #[test]
     fn test_deconstruct_range() {
-        let expected = (65, 69);
+        let expected = (0x41, 0x45);
         let check = deconstruct_range(&('A'..'E')); // Range
         assert_eq!(check, expected);
         let check = deconstruct_range(&('A'..='D')); // Range Inclusive
         assert_eq!(check, expected);
         let check = deconstruct_range(&('A'..)); // Range From
-        assert_eq!(check, (65, (char::MAX as u32) + 1));
+        assert_eq!(check, (0x41, (char::MAX as u32) + 1));
         let check = deconstruct_range(&(..'A')); // Range To
-        assert_eq!(check, (0, 65));
+        assert_eq!(check, (0x0, 0x41));
         let check = deconstruct_range(&(..='A')); // Range To Inclusive
-        assert_eq!(check, (0, 66));
+        assert_eq!(check, (0x0, 0x42));
         let check = deconstruct_range(&(..)); // Range Full
-        assert_eq!(check, (0, (char::MAX as u32) + 1));
+        assert_eq!(check, (0x0, (char::MAX as u32) + 1));
     }
 }

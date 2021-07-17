@@ -7,9 +7,9 @@ use icu_uniset::UnicodeSet;
 use std::char;
 
 fn uniset_bench(c: &mut Criterion) {
-    let best_ex = vec![65, 70];
+    let best_ex = vec![0x41, 0x46];
     let best_sample = UnicodeSet::from_inversion_list(best_ex).unwrap();
-    let worst_ex: Vec<u32> = (0..((char::MAX as u32) + 1)).collect();
+    let worst_ex: Vec<u32> = (0x0..((char::MAX as u32) + 1)).collect();
     let worst_sample = UnicodeSet::from_inversion_list(worst_ex).unwrap();
 
     c.bench_function("uniset/overview", |b| {
@@ -30,7 +30,7 @@ fn uniset_bench(c: &mut Criterion) {
             worst_sample
                 .iter_chars()
                 .take(100)
-                .map(|ch| worst_sample.contains_range(&(char::from_u32(0).unwrap()..ch)))
+                .map(|ch| worst_sample.contains_range(&(char::from_u32(0x0).unwrap()..ch)))
                 .count();
         })
     });
@@ -59,7 +59,7 @@ fn uniset_bench(c: &mut Criterion) {
                 sample
                     .iter_chars()
                     .take(100)
-                    .map(|ch| sample.contains_range(&(char::from_u32(0).unwrap()..ch)))
+                    .map(|ch| sample.contains_range(&(char::from_u32(0x0).unwrap()..ch)))
             })
         });
         group.finish();
